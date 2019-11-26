@@ -1,0 +1,37 @@
+Android平台的音频录制主要有以下三种方式：
+
+1.OpenSL ES（Android具体的实现为OpenSL ES API 接口）： 属于Native层提供的接口
+
+2.AudioRecord： 接近底层，能够更加自由灵活地控制，其可以让开发者得到内存中的PCM音频流数据
+
+3.MediaRecorder： 更加上层的API，它可以直接对手机麦克风录入的音频数据进行编码压缩（如AMR、MP3等），并存储为文件
+
+*如何选择：
+
+如果想做一个简单的录音机，输出音频文件，则推荐使用MediaRecorder；如果需要对音频做进一步的算法处理，
+或者需要采用第三方的编码库进行压缩，又或者需要用到网络传输等场景中，那么只能使用AudioRecord或者OpenSL ES，
+其实MediaRecorder底层也是调用了AudioRecord与Android Framework层的AudioFlinger进行交互的。
+
+1.OpenSL ES与Java层的AudioRecord, AudioTrack的关系
+
+利用 Android 提供的 AudioRecord 采集音频，利用 AudioTrack 播放音频，利用 MediaCodec 来编解码，这些 API 均是 Android 提供的 Java 层 API，
+无论是采集、播放还是编解码，这些 API 接口都需要将音频数据从 Java 拷贝到 native 层，或者从 native 层拷贝到 Java，
+如果希望减少拷贝，开发更加高效的 Android 音频应用，则建议使用 Android NDK 提供的 OpenSL ES API 接口，它支持在 native 层直接处理音频数据。
+
+OpenSL ES的优点
+（1）避免音频数据频繁在 native 层和 Java 层拷贝，提高效率
+（2）相比于 Java API，可以更灵活地控制参数
+（3）由于是 C 代码，因此可以做深度优化，比如采用 NEON 优化
+（4）代码细节更难被反编译
+
+OpenSL ES的缺点
+（1）不支持版本低于 Android 2.3 (API 9) 的设备
+（2）没有全部实现 OpenSL ES 定义的特性和功能
+（3）不支持 MIDI
+（4）不支持直接播放 DRM 或者 加密的内容
+（5）不支持音频数据的编解码，如需编解码，需要使用 MediaCodec API 或者第三方库
+（6）在音频延时方面，相比于上层 API，并没有特别明显地改进
+
+ps：
+
+现在的移动设备都是伪立体声的采集，所以出于性能考虑，一般按照单声道进行采集，然后在后期处理中将数据转换为立体声
