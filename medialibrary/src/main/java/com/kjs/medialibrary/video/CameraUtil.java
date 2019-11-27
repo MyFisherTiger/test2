@@ -120,16 +120,16 @@ public class CameraUtil {
             Log.e("Camera Error", "视频参数设置错误:设置预览的尺寸异常，按摄像头支持的最大尺寸预览");
         }
         parameters.setPictureSize(width, height);//设置照片尺寸
-        parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+        parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_FIXED);
         //Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE;// 连续对焦模式
         //Camera.Parameters.FOCUS_MODE_AUTO; //自动聚焦模式
         //Camera.Parameters.FOCUS_MODE_INFINITY;//无穷远
         //Camera.Parameters.FOCUS_MODE_MACRO;//微距
         //Camera.Parameters.FOCUS_MODE_FIXED;//固定焦距
 
-        parameters.setExposureCompensation(0);//设置固定的曝光补偿为0
-        parameters.setAutoExposureLock(true);//关闭自动调节曝光补偿
-        parameters.setAutoWhiteBalanceLock(true);//关闭自动调节黑白平衡
+        //parameters.setExposureCompensation(0);//设置固定的曝光补偿为0
+        //parameters.setAutoExposureLock(true);//关闭自动调节曝光补偿
+        //parameters.setAutoWhiteBalanceLock(true);//关闭自动调节黑白平衡
         if (parameters.isVideoStabilizationSupported()) {//不是所有的照相机设备都支持图像稳定化,判断一下
             parameters.setVideoStabilization(true);//设置视频稳定输出
         }
