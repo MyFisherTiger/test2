@@ -34,6 +34,7 @@ public class VideoRecorder {
     }
 
     /**
+     * 初始化，打开摄像头提供预览，及预览数据监听回调
      * @param context
      * @param surfaceHolder
      */
