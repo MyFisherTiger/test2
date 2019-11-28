@@ -4,6 +4,7 @@ import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
 import android.media.MediaFormat;
+import android.media.MediaMuxer;
 import android.os.Build;
 import android.util.Log;
 
@@ -234,6 +235,8 @@ public class H264Encoder extends BaseVideoEncoder {
         return mediaFormat;
     }
 
+    private MediaMuxer muxer;
+
     private void saveEncoderData() {
         //成功编码后输出的buffer队列，消费者
         LogMedia.info("成功编码后输出的buffer队列，消费者");
@@ -259,6 +262,15 @@ public class H264Encoder extends BaseVideoEncoder {
 
                 LogMedia.info("写到本地的文件长度" + outByteBuffer.length);
                 fos.write(outByteBuffer, 0, outBitSize);
+
+                /*MediaCodec.BufferInfo bufferInfo=new MediaCodec.BufferInfo();
+                String fileName = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+                muxer = new MediaMuxer(VideoFileUtil.getMP4FileAbsolutePath(fileName),
+                        MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+                int videoTrack = muxer.addTrack(this.getMediaFormat());
+                muxer.start();
+                muxer.writeSampleData(videoTrack, byteBuffer, bufferInfo);*/
+
                 encoder.releaseOutputBuffer(outputLength, false);
                 outputLength = encoder.dequeueOutputBuffer(encodeBufferInfo, 0);
                 outByteBuffer = null;
@@ -300,5 +312,11 @@ public class H264Encoder extends BaseVideoEncoder {
         encodeInputBuffers = null;
         encodeOutputBuffers = null;
         encodeBufferInfo = null;
+
+        if(muxer!=null){
+            muxer.stop();
+            muxer.release();
+            muxer=null;
+        }
     }
 }

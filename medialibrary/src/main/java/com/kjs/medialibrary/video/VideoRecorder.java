@@ -60,8 +60,8 @@ public class VideoRecorder {
             }
         });
 
-        audioRecorder = new AudioRecorder();
-        audioRecorder.setEncoder(new AACEncoder());
+        /*audioRecorder = new AudioRecorder();
+        audioRecorder.setEncoder(new AACEncoder());*/
         //audioRecorder.setEncoder(new AMREncoder());
         //audioRecorder.setEncoder(new WAVEncoder());
     }
@@ -84,7 +84,7 @@ public class VideoRecorder {
         videoEncoder.setFinishedEncoder(false);
         record = true;
 
-        audioRecorder.start();
+        //audioRecorder.start();
     }
 
     /**
@@ -95,7 +95,7 @@ public class VideoRecorder {
         videoEncoder.setFinishedEncoder(true);
         LogMedia.info("暂停录制视频");
 
-        audioRecorder.pause();
+        //audioRecorder.pause();
     }
 
     /**
@@ -107,8 +107,8 @@ public class VideoRecorder {
         record = false;
         videoEncoder.release();
 
-        audioRecorder.stop();
-        audioRecorder.release();
+        /*audioRecorder.stop();
+        audioRecorder.release();*/
     }
 
     /**

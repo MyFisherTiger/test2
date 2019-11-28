@@ -4,7 +4,12 @@ import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
 
+import com.kjs.medialibrary.video.VideoFileUtil;
+import com.kjs.medialibrary.video.encoder.BaseVideoEncoder;
+
 import java.nio.ByteBuffer;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * 作者：柯嘉少 on 2019/11/21
@@ -22,7 +27,21 @@ public class MuxerHelper {
 
 
 
-    public void init(){
+    public void init(BaseVideoEncoder videoEncoder){
+        bufferInfo = new MediaCodec.BufferInfo();
+        muxer = null;
+        String fileName = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+        try{
+            muxer = new MediaMuxer(VideoFileUtil.getMP4FileAbsolutePath(fileName),
+                    MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+            int videoTrack = muxer.addTrack(videoEncoder.getMediaFormat());
+            muxer.start();
+
+
+        }catch (Exception e){
+
+        }
+
 
     }
 
