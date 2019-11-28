@@ -1,5 +1,7 @@
 package com.kjs.medialibrary.sound.encoder;
 
+import android.media.MediaFormat;
+
 import com.kjs.medialibrary.sound.AudioFileUtils;
 
 import java.io.File;
@@ -74,6 +76,15 @@ public class WAVEncoder extends BaseAudioEncoder {
             readByte = null;
         }
 
+    }
+
+    /**
+     * pcm转wave实际上是不需要转码的,所以也没有MediaFormat
+     * @return
+     */
+    @Override
+    public MediaFormat getMediaFormat() {
+        return null;
     }
 
     private void addHead(FileOutputStream out, long totalAudioLen, long totalDataLen, long longSampleRate, int channels, long byteRate)

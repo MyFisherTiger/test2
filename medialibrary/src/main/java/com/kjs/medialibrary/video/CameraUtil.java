@@ -33,11 +33,8 @@ public class CameraUtil {
     private PackageManager pm;
     private PhotoCallBack photoCallBack = null;
     private VideoCallBack videoCallBack = null;
-    private int width = 1280;//1280
-    private int height = 720;//720
-    private int FPS=24;
-    private BaseVideoEncoder videoEncoder = null;
-    private boolean record = false;
+    private int width;
+    private int height;
 
     public static interface PhotoCallBack {
         void result(byte[] data);
@@ -47,13 +44,10 @@ public class CameraUtil {
         void result(byte[] data);
     }
 
-    public void setVideoEncoder(BaseVideoEncoder videoEncoder) {
-        this.videoEncoder = videoEncoder;
-        this.videoEncoder.init(FPS, FPS*width*height/1000,width,height);//30帧，256kb的码率（固定的帧率，码率硬解码）
-    }
-
-    public CameraUtil(Activity mContext) {
+    public CameraUtil(Activity mContext,int width,int height) {
         this.mContext = mContext;
+        this.width=width;
+        this.height=height;
     }
 
     public void setPhotoCallBack(PhotoCallBack photoCallBack) {
@@ -130,9 +124,9 @@ public class CameraUtil {
         //parameters.setExposureCompensation(0);//设置固定的曝光补偿为0
         //parameters.setAutoExposureLock(true);//关闭自动调节曝光补偿
         //parameters.setAutoWhiteBalanceLock(true);//关闭自动调节黑白平衡
-        if (parameters.isVideoStabilizationSupported()) {//不是所有的照相机设备都支持图像稳定化,判断一下
+        /*if (parameters.isVideoStabilizationSupported()) {//不是所有的照相机设备都支持图像稳定化,判断一下
             parameters.setVideoStabilization(true);//设置视频稳定输出
-        }
+        }*/
        /* List<Integer> frameRates = parameters.getSupportedPreviewFrameRates();
         int fpsMax = 0;
         for (Integer n : frameRates) {
@@ -271,13 +265,13 @@ public class CameraUtil {
             return;
         }
 
-        final byte[] temp = new byte[5];
+        //final byte[] temp = new byte[5];
         camera.setPreviewCallback(new Camera.PreviewCallback() {
             @Override
             public void onPreviewFrame(byte[] data, Camera camera) {
-                System.arraycopy(data, 0, temp, 0, 4);
+                //System.arraycopy(data, 0, temp, 0, 4);
                 LogMedia.error("当前配置的帧率为：" + camera.getParameters().getPreviewFrameRate());
-                LogMedia.error("有在回调码？" + Arrays.toString(temp));
+                //LogMedia.error("有在回调码？" + Arrays.toString(temp));
 
                 //surfaceholder或textureview消耗了才会填充新数据
                 //这里byte数据即是监听surfaceholder或textureview消耗的byte获取的帧数据 只要相机正在预览就会一直回调此方法
@@ -293,53 +287,12 @@ public class CameraUtil {
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }*/
-                if (record) {
-                    if (videoEncoder != null) {
-                        //实际上相机采集的画面的帧率是动态变化的
-                        encodeVideo(data);
-                    }
-                }
 
                 if (videoCallBack != null) {
                     videoCallBack.result(data);
                 }
             }
         });
-    }
-
-    private void encodeVideo(byte[] data) {
-        LogMedia.info("去编码");
-        videoEncoder.encode(data);
-
-    }
-
-
-    /**
-     * 开始录制视频
-     */
-    public void startRecordVideo() {
-        LogMedia.info("开始录制视频");
-        videoEncoder.setFinishedEncoder(false);
-        record = true;
-    }
-
-    /**
-     * 暂停录制视频
-     */
-    public void pauseRecordVideo() {
-        record = false;
-        videoEncoder.setFinishedEncoder(true);
-        LogMedia.info("暂停录制视频");
-    }
-
-    /**
-     * 停止录制视频
-     */
-    public void StopRecordVideo() {
-        LogMedia.info("停止录制视频");
-        videoEncoder.setFinishedEncoder(true);
-        record = false;
-        videoEncoder.release();
     }
 
 

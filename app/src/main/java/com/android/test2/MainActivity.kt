@@ -11,11 +11,12 @@ import androidx.appcompat.app.AppCompatActivity
 import com.kjs.medialibrary.LogMedia
 import com.kjs.medialibrary.sound.AudioRecorder
 import com.kjs.medialibrary.sound.encoder.WAVEncoder
-import com.kjs.medialibrary.video.CameraUtil
+import com.kjs.medialibrary.video.VideoRecorder
 import com.kjs.medialibrary.video.encoder.H264Encoder
 
 
 class MainActivity : AppCompatActivity() {
+    private var context = this
     //权限
     protected lateinit var permissionManager: PermissionManager
     protected lateinit var permissionRequestListener: OnPermissionRequestListener
@@ -56,14 +57,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    override fun onStop() {
-        super.onStop()
-        cameraUtil?.let {
-            it.releaseCamera()
-        }
-    }
-
-    var cameraUtil = CameraUtil(this)
+    var videoRecorder = VideoRecorder()
 
     //测试摄像头
     private fun testCamera() {
@@ -79,21 +73,19 @@ class MainActivity : AppCompatActivity() {
 
             override fun surfaceDestroyed(p0: SurfaceHolder?) {
                 Log.e("", "SurfaceView销毁")
-                cameraUtil.releaseCamera()
+                videoRecorder.StopRecordVideo()
             }
 
             override fun surfaceCreated(p0: SurfaceHolder?) {
                 Log.e("", "SurfaceView创建")
-                cameraUtil.open(0)
-                cameraUtil.startPreview(p0)
 
+                videoRecorder.init(context, p0)
+                videoRecorder.setVideoEncoder(H264Encoder())
+                videoRecorder.startRecordVideo()
 
-                cameraUtil.setVideoEncoder(H264Encoder())
-                cameraUtil.initRecordVideo()
-                cameraUtil.startRecordVideo()
                 Handler().postDelayed(Runnable {
-                    cameraUtil.StopRecordVideo()
-                },10000)
+                    videoRecorder.StopRecordVideo()
+                }, 10000)
             }
 
         })
