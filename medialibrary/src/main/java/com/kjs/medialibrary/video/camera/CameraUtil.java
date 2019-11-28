@@ -1,4 +1,4 @@
-package com.kjs.medialibrary.video;
+package com.kjs.medialibrary.video.camera;
 
 
 import android.app.Activity;

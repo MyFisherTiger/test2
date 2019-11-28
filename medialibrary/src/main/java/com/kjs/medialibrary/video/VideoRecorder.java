@@ -1,10 +1,12 @@
 package com.kjs.medialibrary.video;
 
 import android.app.Activity;
-import android.media.AudioRecord;
 import android.view.SurfaceHolder;
 
 import com.kjs.medialibrary.LogMedia;
+import com.kjs.medialibrary.sound.AudioRecorder;
+import com.kjs.medialibrary.sound.encoder.AACEncoder;
+import com.kjs.medialibrary.video.camera.CameraUtil;
 import com.kjs.medialibrary.video.encoder.BaseVideoEncoder;
 
 /**
@@ -16,7 +18,7 @@ import com.kjs.medialibrary.video.encoder.BaseVideoEncoder;
  */
 public class VideoRecorder {
     private CameraUtil cameraUtil;
-    private AudioRecord audioRecord;
+    private AudioRecorder audioRecorder;
     private BaseVideoEncoder videoEncoder = null;
     private boolean record = false;
     private int width = 1280;//1280
@@ -25,6 +27,7 @@ public class VideoRecorder {
 
     /**
      * 请先初始化（调用init方法），再设置解码器(如果先设置解码器再init，解码器会阻塞)
+     *
      * @param videoEncoder
      */
     public void setVideoEncoder(BaseVideoEncoder videoEncoder) {
@@ -34,12 +37,15 @@ public class VideoRecorder {
     }
 
     /**
-     * 初始化，打开摄像头提供预览，及预览数据监听回调
+     * 初始化
+     * 1.cameraUtil打开摄像头提供预览，及预览数据监听回调
+     * 2.audioRecord准备录制音频
+     *
      * @param context
      * @param surfaceHolder
      */
     public void init(Activity context, SurfaceHolder surfaceHolder) {
-        cameraUtil = new CameraUtil(context,width,height);
+        cameraUtil = new CameraUtil(context, width, height);
         cameraUtil.open(0);
         cameraUtil.initRecordVideo();
         cameraUtil.startPreview(surfaceHolder);
@@ -54,7 +60,10 @@ public class VideoRecorder {
             }
         });
 
-
+        audioRecorder = new AudioRecorder();
+        audioRecorder.setEncoder(new AACEncoder());
+        //audioRecorder.setEncoder(new AMREncoder());
+        //audioRecorder.setEncoder(new WAVEncoder());
     }
 
     private void encodeVideo(byte[] data) {
@@ -74,6 +83,8 @@ public class VideoRecorder {
         LogMedia.info("开始录制视频");
         videoEncoder.setFinishedEncoder(false);
         record = true;
+
+        audioRecorder.start();
     }
 
     /**
@@ -83,6 +94,8 @@ public class VideoRecorder {
         record = false;
         videoEncoder.setFinishedEncoder(true);
         LogMedia.info("暂停录制视频");
+
+        audioRecorder.pause();
     }
 
     /**
@@ -93,6 +106,9 @@ public class VideoRecorder {
         videoEncoder.setFinishedEncoder(true);
         record = false;
         videoEncoder.release();
+
+        audioRecorder.stop();
+        audioRecorder.release();
     }
 
     /**
