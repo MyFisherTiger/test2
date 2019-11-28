@@ -14,6 +14,18 @@ import java.nio.ByteBuffer;
  * 版本：1.0
  */
 public class MuxerHelper {
+    private MediaMuxer muxer;
+    private MediaFormat audioFormat;
+    private MediaFormat videoFormat;
+    ByteBuffer inputBuffer;
+    MediaCodec.BufferInfo bufferInfo;
+
+
+
+    public void init(){
+
+    }
+
     /*MediaMuxer muxer = new MediaMuxer("temp.mp4", MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
     // More often, the MediaFormat will be retrieved from MediaCodec.getOutputFormat()
     // or MediaExtractor.getTrackFormat().

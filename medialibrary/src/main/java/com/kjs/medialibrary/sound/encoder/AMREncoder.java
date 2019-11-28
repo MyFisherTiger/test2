@@ -24,6 +24,7 @@ import java.util.Date;
  */
 public class AMREncoder extends BaseAudioEncoder {
     private static byte[] header = new byte[]{'#', '!', 'A', 'M', 'R', '\n'};
+    MediaFormat format;
 
     @Override
     public void init(int SAMPLE_RATE, int BIT_RATE, int CHANNEL_COUNT) {
@@ -37,8 +38,8 @@ public class AMREncoder extends BaseAudioEncoder {
     @Override
     public void encode(String sourceFile) {
         try {
-            MediaCodec encoder = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_AUDIO_AMR_NB);
-            MediaFormat format = new MediaFormat();
+            encoder = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_AUDIO_AMR_NB);
+            format = new MediaFormat();
             format.setString(MediaFormat.KEY_MIME, MediaFormat.MIMETYPE_AUDIO_AMR_NB);
             format.setInteger(MediaFormat.KEY_SAMPLE_RATE, SAMPLE_RATE);
             format.setInteger(MediaFormat.KEY_CHANNEL_COUNT, CHANNEL_COUNT);
@@ -114,5 +115,10 @@ public class AMREncoder extends BaseAudioEncoder {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public MediaFormat getMediaFormat() {
+        return format;
     }
 }

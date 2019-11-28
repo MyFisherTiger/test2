@@ -27,13 +27,24 @@ import java.util.Date;
  * 版本：1.0
  */
 public class H264Encoder extends BaseVideoEncoder {
-    FileInputStream fis = null;
-    FileOutputStream fos = null;
-    ByteBuffer[] encodeInputBuffers;
-    ByteBuffer[] encodeOutputBuffers;
-    int outputLength = 0;//outputLength等于-1表示解码后的buffer读取完毕
-    MediaCodec.BufferInfo encodeBufferInfo;
-    int MAX_INPUT = 100 * 1024;
+    private FileInputStream fis = null;
+    private FileOutputStream fos = null;
+    private ByteBuffer[] encodeInputBuffers;
+    private ByteBuffer[] encodeOutputBuffers;
+    private int outputLength = 0;//outputLength等于-1表示解码后的buffer读取完毕
+    private MediaCodec.BufferInfo encodeBufferInfo;
+    private int MAX_INPUT = 100 * 1024;
+    private MediaFormat mediaFormat;
+
+    private boolean wait = false;//是否进行阻塞
+    private byte[] readByte = new byte[MAX_INPUT];
+    private long startTime = 0L;//编码开始时间
+    private long endTime = 0L;//编码结束时间
+    private int inputLength = 0;
+    private ByteBuffer inputBuffer;
+    private byte[] data;
+    private int tag = 0;
+    private int tagCount = 0;
 
     @Override
     public void init(int fps, int bitRate, int width, int height) {
@@ -79,7 +90,7 @@ public class H264Encoder extends BaseVideoEncoder {
 
     private MediaFormat createMediaFormat() {
         getSupportColorFormat();
-        MediaFormat mediaFormat = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, width, height);
+        mediaFormat = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, width, height);
        /* //使用H264编码
         mediaFormat.setString(MediaFormat.KEY_MIME, MediaFormat.MIMETYPE_VIDEO_AVC);
         //设置视频宽度
@@ -165,16 +176,6 @@ public class H264Encoder extends BaseVideoEncoder {
     }
 
 
-    boolean wait = false;//是否进行阻塞
-    byte[] readByte = new byte[MAX_INPUT];
-    long startTime = 0L;//编码开始时间
-    long endTime = 0L;//编码结束时间
-    int inputLength = 0;
-    ByteBuffer inputBuffer;
-    byte[] data;
-    int tag = 0;
-    int tagCount = 0;
-
     @Override
     public void encode(final byte[] encoderData) {
         tagCount += 1;
@@ -224,52 +225,13 @@ public class H264Encoder extends BaseVideoEncoder {
                     saveEncoderData();
                 }
 
-
-                /*//成功编码后输出的buffer队列，消费者
-                LogMedia.info("成功编码后输出的buffer队列，消费者");
-                byte[] outByteBuffer;
-                int outBitSize;
-                outputLength = encoder.dequeueOutputBuffer(encodeBufferInfo, 0);
-                while (outputLength >= 0) {
-                    try {
-                        if (outputLength < 0) {
-                            outputLength = 0;
-                            LogMedia.info("目前编码后的队列buffer处理完毕，等待输入数据进行编码");
-                        }
-
-                        outBitSize = encodeBufferInfo.size;
-                        outByteBuffer = new byte[outBitSize];
-
-                        ByteBuffer byteBuffer = encoder.getOutputBuffers()[outputLength];
-                        byteBuffer.position(encodeBufferInfo.offset);
-                        byteBuffer.limit(encodeBufferInfo.offset + encodeBufferInfo.size);
-
-                        byteBuffer.get(outByteBuffer, 0, encodeBufferInfo.size);
-                        byteBuffer.position(encodeBufferInfo.offset);
-
-                        fos.write(outByteBuffer, 0, outBitSize);
-                        encoder.releaseOutputBuffer(outputLength, false);
-                        outputLength = encoder.dequeueOutputBuffer(encodeBufferInfo, 0);
-                        outByteBuffer = null;
-                        endTime = System.nanoTime();
-
-                        LogMedia.info("编码阻塞的时间（微秒）：" + (endTime - startTime));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-                wait = false;//在输出编码后的数据后，允许新加入数据进行编码*/
-
             }
         }).start();
+    }
 
-
-        /*new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-            }
-        }).start();*/
+    @Override
+    public MediaFormat getMediaFormat() {
+        return mediaFormat;
     }
 
     private void saveEncoderData() {

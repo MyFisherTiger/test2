@@ -38,6 +38,7 @@ public class AACEncoder extends BaseAudioEncoder {
     MediaCodec.BufferInfo encodeBufferInfo;
     int CodecProfileLevel = MediaCodecInfo.CodecProfileLevel.AACObjectLC;
     int MAX_INPUT = 10 * 1024;
+    MediaFormat encodeFormat;
 
     @Override
     public void init(int SAMPLE_RATE, int BIT_RATE, int CHANNEL_COUNT) {
@@ -60,7 +61,7 @@ public class AACEncoder extends BaseAudioEncoder {
     private void initAACMediaEncode() {
         try {
             LogMedia.info("配置AAC编码器,pcm原始码率" + BIT_RATE + "声道数" + CHANNEL_COUNT + "采样率" + SAMPLE_RATE);
-            MediaFormat encodeFormat = MediaFormat.createAudioFormat(MediaFormat.MIMETYPE_AUDIO_AAC,
+            encodeFormat = MediaFormat.createAudioFormat(MediaFormat.MIMETYPE_AUDIO_AAC,
                     SAMPLE_RATE, CHANNEL_COUNT);//参数对应-> mime type、采样率、声道数
             encodeFormat.setInteger(MediaFormat.KEY_BIT_RATE, BIT_RATE);//比特率
             encodeFormat.setInteger(MediaFormat.KEY_AAC_PROFILE, CodecProfileLevel);
@@ -102,6 +103,11 @@ public class AACEncoder extends BaseAudioEncoder {
         };
         timer = new Timer();
         timer.schedule(task, 0);
+    }
+
+    @Override
+    public MediaFormat getMediaFormat() {
+        return encodeFormat;
     }
 
     public void release() {

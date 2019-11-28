@@ -1,6 +1,7 @@
 package com.kjs.medialibrary.sound.encoder;
 
 import android.media.MediaCodec;
+import android.media.MediaFormat;
 
 /**
  * 作者：柯嘉少 on 2019/11/13
@@ -40,4 +41,11 @@ public abstract class BaseAudioEncoder {
      * @param sourceFile
      */
     public abstract void encode(String sourceFile);
+
+    /**
+     * 获取当前编码的format
+     *
+     * @return
+     */
+    public abstract MediaFormat getMediaFormat();
 }

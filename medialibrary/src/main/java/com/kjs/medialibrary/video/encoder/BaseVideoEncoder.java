@@ -1,6 +1,7 @@
 package com.kjs.medialibrary.video.encoder;
 
 import android.media.MediaCodec;
+import android.media.MediaFormat;
 
 /**
  * 作者：柯嘉少 on 2019/11/20
@@ -46,6 +47,13 @@ public abstract class BaseVideoEncoder {
     }
 
     public abstract void encode(byte[] data);
+
+    /**
+     * 获取当前编码的format
+     *
+     * @return
+     */
+    public abstract MediaFormat getMediaFormat();
 
     public abstract void release();
 
