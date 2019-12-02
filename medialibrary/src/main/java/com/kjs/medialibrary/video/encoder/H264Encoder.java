@@ -63,6 +63,7 @@ public class H264Encoder extends BaseVideoEncoder {
         }
 
         initH264MediaEncode();
+        initMuxer();
     }
 
     private void initH264MediaEncode() {
@@ -87,6 +88,26 @@ public class H264Encoder extends BaseVideoEncoder {
             LogMedia.error("创建编码器失败");
         }
 
+    }
+
+    private MediaMuxer muxer;
+    private String fileName;
+    private MediaCodec.BufferInfo bufferInfo;
+    private int videoTrack;
+    private ByteBuffer muxerByteBuffer;
+
+    private void initMuxer(){
+        try {
+            fileName = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+            destinationFile=VideoFileUtil.getMP4FileAbsolutePath(fileName);
+            File mp4FIle=new File(destinationFile);
+            bufferInfo=new MediaCodec.BufferInfo();
+            muxer = new MediaMuxer(mp4FIle.getPath(),MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+            videoTrack = muxer.addTrack(this.getMediaFormat());
+            muxer.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private MediaFormat createMediaFormat() {
@@ -235,7 +256,6 @@ public class H264Encoder extends BaseVideoEncoder {
         return mediaFormat;
     }
 
-    private MediaMuxer muxer;
 
     private void saveEncoderData() {
         //成功编码后输出的buffer队列，消费者
@@ -261,15 +281,16 @@ public class H264Encoder extends BaseVideoEncoder {
                 byteBuffer.position(encodeBufferInfo.offset);
 
                 LogMedia.info("写到本地的文件长度" + outByteBuffer.length);
-                fos.write(outByteBuffer, 0, outBitSize);
+                //Io的写入是较耗时的，最差的情况下甚至会阻塞较长时间导致很多帧没有被编码，看看怎么优化
+                //fos.write(outByteBuffer, 0, outBitSize);
 
-                /*MediaCodec.BufferInfo bufferInfo=new MediaCodec.BufferInfo();
-                String fileName = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-                muxer = new MediaMuxer(VideoFileUtil.getMP4FileAbsolutePath(fileName),
-                        MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
-                int videoTrack = muxer.addTrack(this.getMediaFormat());
-                muxer.start();
-                muxer.writeSampleData(videoTrack, byteBuffer, bufferInfo);*/
+                //合成MP4
+                if(muxer!=null){
+                    muxerByteBuffer=byteBuffer;
+                    muxer.writeSampleData(videoTrack, muxerByteBuffer, bufferInfo);
+                    muxer.stop();
+                }
+
 
                 encoder.releaseOutputBuffer(outputLength, false);
                 outputLength = encoder.dequeueOutputBuffer(encodeBufferInfo, 0);

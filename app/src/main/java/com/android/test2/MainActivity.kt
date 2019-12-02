@@ -78,7 +78,6 @@ class MainActivity : AppCompatActivity() {
 
             override fun surfaceCreated(p0: SurfaceHolder?) {
                 Log.e("", "SurfaceView创建")
-
                 videoRecorder.init(context, p0)
                 videoRecorder.setVideoEncoder(H264Encoder())
                 videoRecorder.startRecordVideo()
