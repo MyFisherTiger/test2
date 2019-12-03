@@ -63,7 +63,7 @@ public class H264Encoder extends BaseVideoEncoder {
         }
 
         initH264MediaEncode();
-        initMuxer();
+        //initMuxer();
     }
 
     private void initH264MediaEncode() {
@@ -285,11 +285,11 @@ public class H264Encoder extends BaseVideoEncoder {
                 //fos.write(outByteBuffer, 0, outBitSize);
 
                 //合成MP4
-                if(muxer!=null){
+                /*if(muxer!=null){
                     muxerByteBuffer=byteBuffer;
                     muxer.writeSampleData(videoTrack, muxerByteBuffer, bufferInfo);
                     muxer.stop();
-                }
+                }*/
 
 
                 encoder.releaseOutputBuffer(outputLength, false);
@@ -334,10 +334,10 @@ public class H264Encoder extends BaseVideoEncoder {
         encodeOutputBuffers = null;
         encodeBufferInfo = null;
 
-        if(muxer!=null){
+        /*if(muxer!=null){
             muxer.stop();
             muxer.release();
             muxer=null;
-        }
+        }*/
     }
 }
