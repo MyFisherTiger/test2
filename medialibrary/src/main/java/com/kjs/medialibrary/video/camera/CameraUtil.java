@@ -35,6 +35,8 @@ public class CameraUtil {
     private VideoCallBack videoCallBack = null;
     private int width;
     private int height;
+    private long lastTime=0;
+    private long currentTime=0;
 
     public static interface PhotoCallBack {
         void result(byte[] data);
@@ -266,11 +268,14 @@ public class CameraUtil {
         }
 
         //final byte[] temp = new byte[5];
+        lastTime=System.nanoTime();
         camera.setPreviewCallback(new Camera.PreviewCallback() {
             @Override
             public void onPreviewFrame(byte[] data, Camera camera) {
                 //System.arraycopy(data, 0, temp, 0, 4);
-                LogMedia.error("当前配置的帧率为：" + camera.getParameters().getPreviewFrameRate());
+                currentTime=System.nanoTime();
+                LogMedia.error("采集的数据多少微秒回调一次：" + (currentTime-lastTime));
+                lastTime=currentTime;
                 //LogMedia.error("有在回调码？" + Arrays.toString(temp));
 
                 //surfaceholder或textureview消耗了才会填充新数据
