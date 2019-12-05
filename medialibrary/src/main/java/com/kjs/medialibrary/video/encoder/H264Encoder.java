@@ -292,6 +292,7 @@ public class H264Encoder extends BaseVideoEncoder {
                 }*/
 
 
+
                 encoder.releaseOutputBuffer(outputLength, false);
                 outputLength = encoder.dequeueOutputBuffer(encodeBufferInfo, 0);
                 outByteBuffer = null;
