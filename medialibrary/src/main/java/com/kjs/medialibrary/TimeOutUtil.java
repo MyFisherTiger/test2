@@ -19,7 +19,7 @@ public class TimeOutUtil {
 
     public static interface QuitTime {
         void doInTime();//容忍时间内能执行就执行
-        void realese();//容忍时间一到，不管了做释放操作，停止执行
+        void release();//容忍时间一到，不管了做释放操作，停止执行
     }
 
     public void setQuitTime(QuitTime quitTime) {
@@ -47,7 +47,7 @@ public class TimeOutUtil {
                 public void run() {
                     if(counterThread!=null&&!tag){
                         counterThread.interrupt();
-                        quitTime.realese();
+                        quitTime.release();
                     }
                 }
             },timeOut/1000);
