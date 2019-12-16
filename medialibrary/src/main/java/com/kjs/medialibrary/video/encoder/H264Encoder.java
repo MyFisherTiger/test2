@@ -9,6 +9,7 @@ import android.os.Build;
 import android.util.Log;
 
 import com.kjs.medialibrary.LogMedia;
+import com.kjs.medialibrary.TimeOutUtil;
 import com.kjs.medialibrary.video.VideoFileUtil;
 
 import java.io.File;
@@ -46,6 +47,7 @@ public class H264Encoder extends BaseVideoEncoder {
     private byte[] data;
     private int tag = 0;
     private int tagCount = 0;
+    private TimeOutUtil timeOutUtil=new TimeOutUtil();
 
     @Override
     public void init(int fps, int bitRate, int width, int height) {
@@ -208,7 +210,7 @@ public class H264Encoder extends BaseVideoEncoder {
         }
         wait = true;
         data = Arrays.copyOf(encoderData, encoderData.length);
-        new Thread(new Runnable() {
+        /*new Thread(new Runnable() {
             @Override
             public void run() {
                 if (encoder == null) {
@@ -248,7 +250,55 @@ public class H264Encoder extends BaseVideoEncoder {
                 }
 
             }
-        }).start();
+        }).start();*/
+
+        timeOutUtil.setTimeOut(30*1000);
+        timeOutUtil.setQuitTime(new TimeOutUtil.QuitTime() {
+            @Override
+            public void doInTime() {//该方法在子线程内执行，是异步的
+                if (encoder == null) {
+                    LogMedia.error("码器未创建或者已关闭");
+                    return;
+                }
+
+                //需要进行编码的buffer队列，生产者
+                LogMedia.info("需要进行编码的buffer队列，生产者");
+                int restLength = data.length;
+                int start = 0;
+                int end = 0;
+                while (restLength > 0 && !finishedEncoder) {
+                    startTime = System.nanoTime();
+                    inputLength = encoder.dequeueInputBuffer(0);
+
+                    if (inputLength != -1) {
+                        inputBuffer = encoder.getInputBuffers()[inputLength];//编码成功的buffer
+                    } else {
+                        break;
+                    }
+                    if (restLength < MAX_INPUT) {
+                        start = end;
+                        end = data.length;
+                    } else {
+                        start = end;
+                        end = start + MAX_INPUT;
+                    }
+                    restLength = restLength - MAX_INPUT;
+                    readByte = Arrays.copyOfRange(data, start, end);//包括下标from，不包括上标to
+                    inputBuffer.clear();//清除之前进入编码队列编码成功的buffer
+                    inputBuffer.limit(MAX_INPUT);//限定buffer长度
+                    inputBuffer.put(readByte);//视频数据填充给inputBuffer
+                    LogMedia.info("填充编码数据" + readByte.length);
+                    encoder.queueInputBuffer(inputLength, 0, readByte.length, 0, 0);//通知编码器 编码
+                    saveEncoderData();
+                }
+            }
+
+            @Override
+            public void release() {//该方法使用任务执行，是异步的
+
+            }
+        });
+        timeOutUtil.start();
     }
 
     @Override
