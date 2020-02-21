@@ -6,7 +6,8 @@ import android.media.MediaCodecList;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
 import android.os.Build;
-import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import com.kjs.medialibrary.LogMedia;
 import com.kjs.medialibrary.TimeOutUtil;
@@ -35,8 +36,8 @@ public class H264Encoder extends BaseVideoEncoder {
     private ByteBuffer[] encodeOutputBuffers;
     private int outputLength = 0;//outputLength等于-1表示解码后的buffer读取完毕
     private MediaCodec.BufferInfo encodeBufferInfo;
-    private int MAX_INPUT = 100 * 1024;
-    private MediaFormat mediaFormat;
+    private int MAX_INPUT = 100 * 1024;//460800;//
+    private MediaFormat outPutFormat;
 
     private boolean wait = false;//是否进行阻塞
     private byte[] readByte = new byte[MAX_INPUT];
@@ -47,7 +48,7 @@ public class H264Encoder extends BaseVideoEncoder {
     private byte[] data;
     private int tag = 0;
     private int tagCount = 0;
-    private TimeOutUtil timeOutUtil=new TimeOutUtil();
+    private TimeOutUtil timeOutUtil = new TimeOutUtil();
 
     @Override
     public void init(int fps, int bitRate, int width, int height) {
@@ -76,15 +77,11 @@ public class H264Encoder extends BaseVideoEncoder {
             } else {
                 return;
             }
-            MediaFormat mediaFormat = createMediaFormat();
-            encoder.configure(mediaFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
 
-            LogMedia.info("编码器开始工作");
-            encoder.start();
 
-            encodeInputBuffers = encoder.getInputBuffers();
+            /*encodeInputBuffers = encoder.getInputBuffers();
             encodeOutputBuffers = encoder.getOutputBuffers();
-            encodeBufferInfo = new MediaCodec.BufferInfo();
+            encodeBufferInfo = new MediaCodec.BufferInfo();*/
         } catch (IOException e) {
             e.printStackTrace();
             LogMedia.error("创建编码器失败");
@@ -92,48 +89,42 @@ public class H264Encoder extends BaseVideoEncoder {
 
     }
 
-    private MediaMuxer muxer;
+    /*private MediaMuxer muxer;
     private String fileName;
     private MediaCodec.BufferInfo bufferInfo;
     private int videoTrack;
     private ByteBuffer muxerByteBuffer;
 
-    private void initMuxer(){
+    private void initMuxer() {
         try {
             fileName = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-            destinationFile=VideoFileUtil.getMP4FileAbsolutePath(fileName);
-            File mp4FIle=new File(destinationFile);
-            bufferInfo=new MediaCodec.BufferInfo();
-            muxer = new MediaMuxer(mp4FIle.getPath(),MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
-            videoTrack = muxer.addTrack(this.getMediaFormat());
+            destinationFile = VideoFileUtil.getMP4FileAbsolutePath(fileName);
+            File mp4FIle = new File(destinationFile);
+            bufferInfo = new MediaCodec.BufferInfo();
+            muxer = new MediaMuxer(mp4FIle.getPath(), MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+            videoTrack = muxer.addTrack(this.getOutPutFormat());
             muxer.start();
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
     private MediaFormat createMediaFormat() {
         getSupportColorFormat();
-        mediaFormat = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, width, height);
-       /* //使用H264编码
-        mediaFormat.setString(MediaFormat.KEY_MIME, MediaFormat.MIMETYPE_VIDEO_AVC);
-        //设置视频宽度
-        mediaFormat.setInteger(MediaFormat.KEY_WIDTH, width);
-        //设置视频高度
-        mediaFormat.setInteger(MediaFormat.KEY_HEIGHT, height);*/
+        outPutFormat = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, width, height);
 
         //设置视频码率
-        mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, BIT_RATE);
+        outPutFormat.setInteger(MediaFormat.KEY_BIT_RATE, BIT_RATE);
         //设置视频fps
-        mediaFormat.setInteger(MediaFormat.KEY_FRAME_RATE, FPS);
+        outPutFormat.setInteger(MediaFormat.KEY_FRAME_RATE, FPS);
         /*这里需要注意，为了简单这里是写了个固定的ColorFormat
         实际上，并不是所有的手机都支持COLOR_FormatYUV420Planar颜色空间
         所以正确的做法应该是，获取当前设备支持的颜色空间，并从中选取*/
 
-        mediaFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar);
+        outPutFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar);
         //设置视频关键帧间隔，这里设置两秒一个关键帧
-        mediaFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1);
-        mediaFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, MAX_INPUT);//设置缓冲池的最大值
+        outPutFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1);
+        outPutFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, MAX_INPUT);//设置缓冲池的最大值
         /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
          *//**
          * 可选配置，设置码率模式
@@ -141,20 +132,20 @@ public class H264Encoder extends BaseVideoEncoder {
          * BITRATE_MODE_VBR：可变码率
          * BITRATE_MODE_CBR：恒定码率
          *//*
-            mediaFormat.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR);
+            outPutFormat.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR);
             *//**
          * 可选配置，设置H264 Profile
          * 需要做兼容性检查
          *//*
-            mediaFormat.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.AVCProfileHigh);
+            outPutFormat.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.AVCProfileHigh);
             *//**
          * 可选配置，设置H264 Level
          * 需要做兼容性检查
          *//*
-            mediaFormat.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.HEVCHighTierLevel31);
+            outPutFormat.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.HEVCHighTierLevel31);
         }*/
 
-        return mediaFormat;
+        return outPutFormat;
     }
 
     private int getSupportColorFormat() {
@@ -200,8 +191,26 @@ public class H264Encoder extends BaseVideoEncoder {
     }
 
 
+    //MediaFormat mOutputFormat;
+
     @Override
     public void encode(final byte[] encoderData) {
+        data=encoderData;
+        LogMedia.error("需要编码的数据一帧的长度为：" + data.length);
+        /*if (data.length > MAX_INPUT) {
+            LogMedia.error("编码器缓冲区长度过短，请重新设置缓冲区大小");
+            return;
+        }*/
+        if (encoder == null) {
+            LogMedia.error("创建编码器");
+            try {
+                encoder = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_VIDEO_AVC);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
+        }
+
         tagCount += 1;
         if (wait) {//处理完一帧数据的编码后，才能接收下一帧数据
             tag += 1;
@@ -209,8 +218,77 @@ public class H264Encoder extends BaseVideoEncoder {
             return;
         }
         wait = true;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            encoder.setCallback(new MediaCodec.Callback() {
+                @Override
+                public void onInputBufferAvailable(@NonNull MediaCodec mediaCodec, int i) {
+                    ByteBuffer inputBuffer = encoder.getInputBuffer(i);
+                    //填充编码数据
+                    LogMedia.info("填充编码数据"+i+"~~" + inputBuffer.toString());
+                    inputBuffer.put(data);
+                    encoder.queueInputBuffer(i, 0, data.length, 0, 0);
+                }
+
+                @Override
+                public void onOutputBufferAvailable(@NonNull MediaCodec mediaCodec, int i, @NonNull MediaCodec.BufferInfo bufferInfo) {
+                    ByteBuffer outputBuffer = encoder.getOutputBuffer(i);//outputBuffer is ready to be processed or rendered.
+                    //MediaFormat bufferFormat = encoder.getOutputFormat(i);//bufferFormat is equivalent to mOutputFormat
+                    //编码后的数据存到本地
+                    int outBitSize = bufferInfo.size;
+                    byte[] outByte = new byte[outBitSize];
+                    outputBuffer.position(bufferInfo.offset);
+                    outputBuffer.limit(bufferInfo.offset+bufferInfo.size);
+                    outputBuffer.get(outByte,0,bufferInfo.size);
+                    outputBuffer.position(bufferInfo.offset);
+                    //Io的写入是较耗时的，最差的情况下甚至会阻塞较长时间导致很多帧没有被编码，看看怎么优化
+                    LogMedia.info("写到本地的文件:"+i+"bufferInfo.size:"+bufferInfo.size+"~~" +outputBuffer.toString());
+
+                    try {
+                        fos.write(outByte, 0, outBitSize);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    //释放输出缓冲区
+                    encoder.releaseOutputBuffer(i, false);
+                    encoder.stop();
+                    wait = false;
+                }
+
+                @Override
+                public void onError(@NonNull MediaCodec mediaCodec, @NonNull MediaCodec.CodecException e) {
+                    LogMedia.error("本帧编码出错");
+                    //释放输出缓冲区
+                    encoder.stop();
+                    wait = false;
+                }
+
+                @Override
+                public void onOutputFormatChanged(@NonNull MediaCodec mediaCodec, @NonNull MediaFormat mediaFormat) {
+                    //outPutFormat = mediaFormat;
+                }
+            });
+        } else {
+            LogMedia.error("系统版本过低，需要android系统至少为5.0");
+        }
+
+        encoder.configure(createMediaFormat(), null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+
+        LogMedia.info("编码器开始工作");
+        encoder.start();
+
+
+        /*tagCount += 1;
+        if (wait) {//处理完一帧数据的编码后，才能接收下一帧数据
+            tag += 1;
+            LogMedia.error("遗漏了多少帧没编码：" + tag);
+            return;
+        }
+        wait = true;
         data = Arrays.copyOf(encoderData, encoderData.length);
-        /*new Thread(new Runnable() {
+        LogMedia.error("本帧数据有多长：" + data.length);
+        new Thread(new Runnable() {
             @Override
             public void run() {
                 if (encoder == null) {
@@ -252,7 +330,7 @@ public class H264Encoder extends BaseVideoEncoder {
             }
         }).start();*/
 
-        timeOutUtil.setTimeOut(30*1000);
+        /*timeOutUtil.setTimeOut(30*1000);
         timeOutUtil.setQuitTime(new TimeOutUtil.QuitTime() {
             @Override
             public void doInTime() {//该方法在子线程内执行，是异步的
@@ -298,12 +376,12 @@ public class H264Encoder extends BaseVideoEncoder {
 
             }
         });
-        timeOutUtil.start();
+        timeOutUtil.start();*/
     }
 
     @Override
-    public MediaFormat getMediaFormat() {
-        return mediaFormat;
+    public MediaFormat getOutPutFormat() {
+        return outPutFormat;
     }
 
 
@@ -342,13 +420,12 @@ public class H264Encoder extends BaseVideoEncoder {
                 }*/
 
 
-
                 encoder.releaseOutputBuffer(outputLength, false);
                 outputLength = encoder.dequeueOutputBuffer(encodeBufferInfo, 0);
                 outByteBuffer = null;
                 endTime = System.nanoTime();
 
-                LogMedia.info("编码阻塞的时间（微秒）：" + (endTime - startTime));
+                LogMedia.info("编码阻塞的时间（纳秒）：" + (endTime - startTime));
             } catch (Exception e) {
                 e.printStackTrace();
             }

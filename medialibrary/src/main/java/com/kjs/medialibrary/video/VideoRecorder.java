@@ -21,8 +21,8 @@ public class VideoRecorder {
     private AudioRecorder audioRecorder;
     private BaseVideoEncoder videoEncoder = null;
     private boolean record = false;
-    private int width = 640;//1280
-    private int height = 480;//720
+    private int width = 1280;//1280
+    private int height = 720;//720
     private int FPS = 24;
 
     /**

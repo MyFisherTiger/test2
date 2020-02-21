@@ -13,8 +13,8 @@ import android.media.MediaFormat;
 public abstract class BaseVideoEncoder {
     protected int FPS = 30;//默认采样率30帧
     protected int BIT_RATE = 64;//默认码率64bit
-    protected int width=1080;//视频宽度1080
-    protected int height=720;//视频高度720
+    protected int width=640;//视频宽度1080
+    protected int height=480;//视频高度720
     protected String destinationFile;//转码后的文件，未转码时为空
     protected MediaCodec encoder;
     protected boolean finishedEncoder=false;//是否已完成编码，true已完成，停止编码；false未完成，编码队列继续编码
@@ -53,7 +53,7 @@ public abstract class BaseVideoEncoder {
      *
      * @return
      */
-    public abstract MediaFormat getMediaFormat();
+    public abstract MediaFormat getOutPutFormat();
 
     public abstract void release();
 

@@ -274,7 +274,7 @@ public class CameraUtil {
             public void onPreviewFrame(byte[] data, Camera camera) {
                 //System.arraycopy(data, 0, temp, 0, 4);
                 currentTime=System.nanoTime();
-                LogMedia.error("采集的数据多少微秒回调一次：" + (currentTime-lastTime));
+                LogMedia.error("采集的数据多少纳秒回调一次：" + (currentTime-lastTime));
                 lastTime=currentTime;
                 //LogMedia.error("有在回调码？" + Arrays.toString(temp));
 

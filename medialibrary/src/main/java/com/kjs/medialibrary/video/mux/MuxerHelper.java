@@ -34,7 +34,7 @@ public class MuxerHelper {
         try{
             muxer = new MediaMuxer(VideoFileUtil.getMP4FileAbsolutePath(fileName),
                     MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
-            int videoTrack = muxer.addTrack(videoEncoder.getMediaFormat());
+            int videoTrack = muxer.addTrack(videoEncoder.getOutPutFormat());
             muxer.start();
 
 

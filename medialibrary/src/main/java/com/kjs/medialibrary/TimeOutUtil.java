@@ -12,7 +12,7 @@ import java.util.TimerTask;
  */
 public class TimeOutUtil {
     private QuitTime quitTime;
-    private long timeOut = 1000 * 1000;//默认允许的超时容忍值（1000000微秒=1秒），单位微秒
+    private long timeOut = 1000 * 1000*1000;//默认允许的超时容忍值（1000，000，000纳秒=1秒），单位纳秒
     private boolean tag=false;//doInTime是否及时跑完
     private Thread counterThread;
     private Timer timer=new Timer();
