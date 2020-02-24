@@ -1,13 +1,21 @@
 package com.kjs.medialibrary.video;
 
 import android.app.Activity;
+import android.media.MediaCodec;
+import android.media.MediaFormat;
+import android.media.MediaMuxer;
 import android.view.SurfaceHolder;
 
 import com.kjs.medialibrary.LogMedia;
 import com.kjs.medialibrary.sound.AudioRecorder;
 import com.kjs.medialibrary.sound.encoder.AACEncoder;
+import com.kjs.medialibrary.sound.encoder.WAVEncoder;
 import com.kjs.medialibrary.video.camera.CameraUtil;
 import com.kjs.medialibrary.video.encoder.BaseVideoEncoder;
+import com.kjs.medialibrary.video.mux.MuxerHelper;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /**
  * 作者：柯嘉少 on 2019/11/28
@@ -60,18 +68,42 @@ public class VideoRecorder {
             }
         });
 
-        /*audioRecorder = new AudioRecorder();
-        audioRecorder.setEncoder(new AACEncoder());*/
+
+
+
+        audioRecorder = new AudioRecorder();
+        audioRecorder.setEncoder(new AACEncoder());
         //audioRecorder.setEncoder(new AMREncoder());
         //audioRecorder.setEncoder(new WAVEncoder());
+
     }
 
+    private MediaMuxer muxer;
     private void encodeVideo(byte[] data) {
         if (videoEncoder == null) {
             return;
         }
         LogMedia.info("去编码");
         videoEncoder.encode(data);
+        //编码后回调合成
+        videoEncoder.setCallBackEncodeData(new BaseVideoEncoder.CallBackEncodeData() {
+            @Override
+            public void callBack(ByteBuffer outputBuffer, MediaFormat outPutFormat, MediaCodec.BufferInfo bufferInfo) {
+                try {
+                    String desFile=VideoFileUtil.getMP4FileAbsolutePath("desFile");
+                    muxer = new MediaMuxer(desFile, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+                    int currentTrackIndex=muxer.addTrack(outPutFormat);
+                    //boolean finished = false;
+                    //boolean isAudioSample=false;//是否来自音频
+                    muxer.start();
+                    muxer.writeSampleData(currentTrackIndex,outputBuffer,bufferInfo);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
 
     }
 
@@ -84,7 +116,7 @@ public class VideoRecorder {
         videoEncoder.setFinishedEncoder(false);
         record = true;
 
-        //audioRecorder.start();
+        audioRecorder.start();
     }
 
     /**
@@ -95,7 +127,7 @@ public class VideoRecorder {
         videoEncoder.setFinishedEncoder(true);
         LogMedia.info("暂停录制视频");
 
-        //audioRecorder.pause();
+        audioRecorder.pause();
     }
 
     /**
@@ -106,9 +138,13 @@ public class VideoRecorder {
         videoEncoder.setFinishedEncoder(true);
         record = false;
         videoEncoder.release();
+        //String str=VideoFileUtil.getOriginFileAbsolutePath("input");
+        //MuxerHelper.muxerVideo(str);
 
-        /*audioRecorder.stop();
-        audioRecorder.release();*/
+        audioRecorder.stop();
+
+        //muxer.stop();
+        //muxer.release();
     }
 
     /**

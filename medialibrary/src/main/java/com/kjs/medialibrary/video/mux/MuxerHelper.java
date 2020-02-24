@@ -1,15 +1,24 @@
 package com.kjs.medialibrary.video.mux;
 
 import android.media.MediaCodec;
+import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
+import android.os.Build;
+import android.util.Log;
 
+import androidx.annotation.RequiresApi;
+
+import com.kjs.medialibrary.LogMedia;
 import com.kjs.medialibrary.video.VideoFileUtil;
 import com.kjs.medialibrary.video.encoder.BaseVideoEncoder;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import static android.content.ContentValues.TAG;
 
 /**
  * 作者：柯嘉少 on 2019/11/21
@@ -19,31 +28,26 @@ import java.util.Date;
  * 版本：1.0
  */
 public class MuxerHelper {
-    private MediaMuxer muxer;
-    private MediaFormat audioFormat;
-    private MediaFormat videoFormat;
-    ByteBuffer inputBuffer;
-    MediaCodec.BufferInfo bufferInfo;
 
 
+    public static void muxerVideo(String sdcard_path,ByteBuffer outputBuffer, MediaFormat outPutFormat, MediaCodec.BufferInfo bufferInfo) {
+        try {
+            MediaMuxer muxer = new MediaMuxer(sdcard_path, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+            int currentTrackIndex=muxer.addTrack(outPutFormat);
+            //boolean finished = false;
+            //boolean isAudioSample=false;//是否来自音频
 
-    public void init(BaseVideoEncoder videoEncoder){
-        bufferInfo = new MediaCodec.BufferInfo();
-        muxer = null;
-        String fileName = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-        try{
-            muxer = new MediaMuxer(VideoFileUtil.getMP4FileAbsolutePath(fileName),
-                    MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
-            int videoTrack = muxer.addTrack(videoEncoder.getOutPutFormat());
             muxer.start();
-
-
-        }catch (Exception e){
-
+            muxer.writeSampleData(currentTrackIndex,outputBuffer,bufferInfo);
+            muxer.stop();
+            muxer.release();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
 
     }
+
 
     /*MediaMuxer muxer = new MediaMuxer("temp.mp4", MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
     // More often, the MediaFormat will be retrieved from MediaCodec.getOutputFormat()

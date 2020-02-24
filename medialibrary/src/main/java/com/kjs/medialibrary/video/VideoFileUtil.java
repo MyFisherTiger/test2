@@ -28,8 +28,8 @@ public class VideoFileUtil {
             throw new NullPointerException("fileName isEmpty");
         }
         String mAudioRawPath = "";
-        if (!fileName.endsWith(".origin")) {
-            fileName = fileName + ".origin";
+        if (!fileName.endsWith(".mp4")) {
+            fileName = fileName + ".mp4";
         }
         String fileBasePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + rootPath + "/video/";
         File file = new File(fileBasePath);
@@ -46,8 +46,8 @@ public class VideoFileUtil {
             throw new NullPointerException("fileName isEmpty");
         }
         String mAudioRawPath = "";
-        if (!fileName.endsWith(".MP4")) {
-            fileName = fileName + ".MP4";
+        if (!fileName.endsWith(".mp4")) {
+            fileName = fileName + ".mp4";
         }
         String fileBasePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + rootPath + "/mp4/";
         File file = new File(fileBasePath);

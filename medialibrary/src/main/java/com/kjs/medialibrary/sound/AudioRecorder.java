@@ -56,8 +56,10 @@ public class AudioRecorder {
         STATUS_PAUSE,
         STATUS_STOP
     }
+
     public interface CallBack {
         void recordProgress(int progress);
+
         void volume(int volume);
     }
 
@@ -161,16 +163,17 @@ public class AudioRecorder {
      * 文件进行转码，格式封装
      */
     private void makeDestFile() {
-        if (encoder == null)
+        if (encoder == null || audioRecord == null)
             return;
         LogMedia.error("开始转码");
         new Thread() {
             @Override
             public void run() {
-                releaseRecorder();
-                int bitRate=audioSampleRate * 16 * audioRecord.getChannelCount();//264600
+                //releaseRecorder();
+                int bitRate = audioSampleRate * 16 * audioRecord.getChannelCount();//264600
                 encoder.init(audioSampleRate, bitRate, audioRecord.getChannelCount());
                 encoder.encode(pcmFileName);
+                release();//转完码再释放
             }
         }.run();
     }
@@ -254,7 +257,7 @@ public class AudioRecorder {
                 if (file.exists())
                     file.delete();
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -263,7 +266,7 @@ public class AudioRecorder {
     //将音频写入文件
     private void recordToFile() {
         LogMedia.info("采集的音频数据写入pcm文件");
-        saveFileThread=new Thread(new Runnable() {
+        saveFileThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 byte[] audioData = new byte[bufferSizeInBytes];
@@ -301,7 +304,10 @@ public class AudioRecorder {
                     if (fos != null) {
                         fos.close();
                         LogMedia.info("pcm文件写入完毕");
-                        makeDestFile();
+                        if (status == Status.STATUS_READY) {
+                            makeDestFile();
+                        }
+
                     }
                 } catch (IOException e) {
                     Log.e("AudioRecorder", e.getMessage());
@@ -316,15 +322,19 @@ public class AudioRecorder {
     public int getCurrentPosition() {
         return currentPosition;
     }
+
     /**
      * 获取当前的录音状态
+     *
      * @return
      */
     public Status getStatus() {
         return status;
     }
+
     /**
      * 获取当前的录音文件的位置
+     *
      * @return
      */
     public String getVoiceFilePath() {
