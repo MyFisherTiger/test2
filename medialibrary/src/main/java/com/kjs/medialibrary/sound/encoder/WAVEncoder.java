@@ -78,6 +78,21 @@ public class WAVEncoder extends BaseAudioEncoder {
 
     }
 
+    @Override
+    public void encode(byte[] encoderData) {
+
+    }
+
+    @Override
+    public void pause() {
+
+    }
+
+    @Override
+    public void release() {
+
+    }
+
     /**
      * pcm转wave实际上是不需要转码的,所以也没有MediaFormat
      * @return

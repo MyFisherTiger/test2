@@ -118,6 +118,21 @@ public class AMREncoder extends BaseAudioEncoder {
     }
 
     @Override
+    public void encode(byte[] encoderData) {
+
+    }
+
+    @Override
+    public void pause() {
+
+    }
+
+    @Override
+    public void release() {
+
+    }
+
+    @Override
     public MediaFormat getMediaFormat() {
         return format;
     }

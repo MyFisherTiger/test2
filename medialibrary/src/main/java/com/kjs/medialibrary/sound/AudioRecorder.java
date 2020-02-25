@@ -102,6 +102,10 @@ public class AudioRecorder {
         this.encoder = encoder;
     }
 
+    public BaseAudioEncoder getEncoder() {
+        return encoder;
+    }
+
     /**
      * @param callBack
      */
@@ -116,6 +120,7 @@ public class AudioRecorder {
         bufferSizeInBytes = AudioRecord.getMinBufferSize(audioSampleRate,
                 audioChannel, audioEncode);
         audioRecord = new AudioRecord(audioInput, audioSampleRate, audioChannel, audioEncode, bufferSizeInBytes);
+        initEncoder();
         if (status == Status.STATUS_NO_READY) {
             return;
         }
@@ -158,26 +163,6 @@ public class AudioRecorder {
         }
     }
 
-
-    /**
-     * 文件进行转码，格式封装
-     */
-    private void makeDestFile() {
-        if (encoder == null || audioRecord == null)
-            return;
-        LogMedia.error("开始转码");
-        new Thread() {
-            @Override
-            public void run() {
-                //releaseRecorder();
-                int bitRate = audioSampleRate * 16 * audioRecord.getChannelCount();//264600
-                encoder.init(audioSampleRate, bitRate, audioRecord.getChannelCount());
-                encoder.encode(pcmFileName);
-                release();//转完码再释放
-            }
-        }.run();
-    }
-
     /**
      * 释放录音资源
      */
@@ -185,12 +170,14 @@ public class AudioRecorder {
         LogMedia.info("释放录音资源");
         stopRecorder();
         releaseRecorder();
-        status = Status.STATUS_READY;
         //clearFiles();
     }
 
     //释放资源
     private void releaseRecorder() {
+        if(encoder!=null){
+            encoder.release();
+        }
 
         if (audioRecord != null) {
             audioRecord.release();
@@ -293,8 +280,15 @@ public class AudioRecorder {
                         lastVolume = raw > 10 ? raw - 10 : 0;
                         //Log.i(TAG, "writeDataTOFile: volume -- " + raw + " / lastvolumn -- " + lastVolume);
                     }*/
-                            if (readsize > 0 && readsize <= audioData.length)
+                            if (readsize > 0 && readsize <= audioData.length){
                                 fos.write(audioData, 0, readsize);
+                                if(!BaseAudioEncoder.wait){
+                                    encoder.encode(audioData);
+                                }
+                            }
+
+
+
                         } catch (IOException e) {
                             Log.e("AudioRecorder", e.getMessage());
                         }
@@ -304,9 +298,9 @@ public class AudioRecorder {
                     if (fos != null) {
                         fos.close();
                         LogMedia.info("pcm文件写入完毕");
-                        if (status == Status.STATUS_READY) {
+                        /*if (status == Status.STATUS_READY) {
                             makeDestFile();
-                        }
+                        }*/
 
                     }
                 } catch (IOException e) {
@@ -316,6 +310,12 @@ public class AudioRecorder {
         });
         saveFileThread.start();
 
+    }
+
+    private void initEncoder(){
+        //设定码率
+        int bitRate = audioSampleRate * 16 * audioRecord.getChannelCount();//264600
+        encoder.init(audioSampleRate, bitRate, audioRecord.getChannelCount());
     }
 
 

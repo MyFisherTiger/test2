@@ -106,10 +106,21 @@ public class AACEncoder extends BaseAudioEncoder {
     }
 
     @Override
+    public void encode(byte[] encoderData) {
+
+    }
+
+    @Override
+    public void pause() {
+
+    }
+
+    @Override
     public MediaFormat getMediaFormat() {
         return encodeFormat;
     }
 
+    @Override
     public void release() {
         LogMedia.info("关闭文件流释放资源");
         if (timer != null) {

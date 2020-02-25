@@ -3,6 +3,8 @@ package com.kjs.medialibrary.video.encoder;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
 
+import com.kjs.medialibrary.BaseEncoder;
+
 import java.nio.ByteBuffer;
 
 /**
@@ -12,7 +14,7 @@ import java.nio.ByteBuffer;
  * 修订者：
  * 版本：1.0
  */
-public abstract class BaseVideoEncoder {
+public abstract class BaseVideoEncoder extends BaseEncoder {
     protected int FPS = 30;//默认采样率30帧
     protected int BIT_RATE = 64;//默认码率64bit
     protected int width = 640;//视频宽度1080
@@ -21,17 +23,7 @@ public abstract class BaseVideoEncoder {
     protected MediaCodec encoder;
     protected boolean finishedEncoder = false;//是否已完成编码，true已完成，停止编码；false未完成，编码队列继续编码
 
-    protected CallBackEncodeData listener = null;
 
-
-    public interface CallBackEncodeData {
-        void callBack(ByteBuffer outputBuffer, MediaFormat outPutFormat, MediaCodec.BufferInfo bufferInfo);
-
-    }
-
-    public void setCallBackEncodeData(CallBackEncodeData callBackEncodeData) {
-        this.listener = callBackEncodeData;
-    }
 
     /**
      * 设置是否结束编码

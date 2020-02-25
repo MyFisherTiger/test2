@@ -2,13 +2,17 @@ package com.kjs.medialibrary.video;
 
 import android.app.Activity;
 import android.media.MediaCodec;
+import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
+import android.os.Environment;
 import android.view.SurfaceHolder;
 
+import com.kjs.medialibrary.BaseEncoder;
 import com.kjs.medialibrary.LogMedia;
 import com.kjs.medialibrary.sound.AudioRecorder;
 import com.kjs.medialibrary.sound.encoder.AACEncoder;
+import com.kjs.medialibrary.sound.encoder.AACEncoder2;
 import com.kjs.medialibrary.sound.encoder.WAVEncoder;
 import com.kjs.medialibrary.video.camera.CameraUtil;
 import com.kjs.medialibrary.video.encoder.BaseVideoEncoder;
@@ -32,6 +36,10 @@ public class VideoRecorder {
     private int width = 1280;//1280
     private int height = 720;//720
     private int FPS = 24;
+    private String fileName;
+    private String desFile;
+    private int audioTrack;
+    private int vedioTrack;
 
     /**
      * 请先初始化（调用init方法），再设置解码器(如果先设置解码器再init，解码器会阻塞)
@@ -53,6 +61,11 @@ public class VideoRecorder {
      * @param surfaceHolder
      */
     public void init(Activity context, SurfaceHolder surfaceHolder) {
+        audioRecorder = new AudioRecorder();
+        audioRecorder.setEncoder(new AACEncoder2());
+        //audioRecorder.setEncoder(new AMREncoder());
+        //audioRecorder.setEncoder(new WAVEncoder());
+
         cameraUtil = new CameraUtil(context, width, height);
         cameraUtil.open(0);
         cameraUtil.initRecordVideo();
@@ -68,17 +81,23 @@ public class VideoRecorder {
             }
         });
 
+        fileName=""+System.currentTimeMillis();
+        desFile = VideoFileUtil.getMP4FileAbsolutePath(fileName);
+        try {
+            muxer = new MediaMuxer(desFile, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+            isFirst = true;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
 
 
-        audioRecorder = new AudioRecorder();
-        audioRecorder.setEncoder(new AACEncoder());
-        //audioRecorder.setEncoder(new AMREncoder());
-        //audioRecorder.setEncoder(new WAVEncoder());
 
     }
 
     private MediaMuxer muxer;
+    private boolean isFirst = true;
+
     private void encodeVideo(byte[] data) {
         if (videoEncoder == null) {
             return;
@@ -88,21 +107,54 @@ public class VideoRecorder {
         //编码后回调合成
         videoEncoder.setCallBackEncodeData(new BaseVideoEncoder.CallBackEncodeData() {
             @Override
-            public void callBack(ByteBuffer outputBuffer, MediaFormat outPutFormat, MediaCodec.BufferInfo bufferInfo) {
+            public void callBack(boolean isAudio, ByteBuffer outputBuffer, MediaFormat outPutFormat, MediaCodec.BufferInfo bufferInfo) {
                 try {
-                    String desFile=VideoFileUtil.getMP4FileAbsolutePath("desFile");
-                    muxer = new MediaMuxer(desFile, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
-                    int currentTrackIndex=muxer.addTrack(outPutFormat);
-                    //boolean finished = false;
-                    //boolean isAudioSample=false;//是否来自音频
-                    muxer.start();
-                    muxer.writeSampleData(currentTrackIndex,outputBuffer,bufferInfo);
+                    if(isFirst){
+                        audioTrack=muxer.addTrack(audioRecorder.getEncoder().getMediaFormat());
+                        vedioTrack = muxer.addTrack(videoEncoder.getOutPutFormat());
+                        muxer.start();
+                        isFirst=false;
+                    }
 
+                    //MediaFormat videoFormat = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, 1280, 720);
+                    byte[] header_sps = {0, 0, 0, 1, 103, 100, 0, 31, -84, -76, 2, -128, 45, -56};
+                    byte[] header_pps = {0, 0, 0, 1, 104, -18, 60, 97, 15, -1, -16, -121, -1, -8, 67, -1, -4, 33, -1, -2, 16, -1, -1, 8, 127, -1, -64};
+                    outPutFormat.setByteBuffer("csd-0", ByteBuffer.wrap(header_sps));
+                    outPutFormat.setByteBuffer("csd-1", ByteBuffer.wrap(header_pps));
+
+                    int currentTrackIndex = isAudio?audioTrack:vedioTrack;
+
+                    ByteBuffer metaBuffer = ByteBuffer.allocate(bufferInfo.size);
+                    metaBuffer.put(outputBuffer);
+                    metaBuffer.clear();
+                    LogMedia.error("metaBuffer是多少：" + metaBuffer.toString());
+
+
+                    MediaCodec.BufferInfo metaInfo = new MediaCodec.BufferInfo();
+                    metaInfo.presentationTimeUs = bufferInfo.presentationTimeUs;
+                    metaInfo.offset = 0;
+                    metaInfo.flags = bufferInfo.flags;
+                    metaInfo.size = bufferInfo.size;
+
+                    muxer.writeSampleData(currentTrackIndex, metaBuffer, metaInfo);
+
+                    if(bufferInfo.flags==MediaCodec.BUFFER_FLAG_END_OF_STREAM){//该结束了
+                        muxer.stop();
+                        muxer.release();
+
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         });
+
+        /*audioRecorder.getEncoder().setCallBackEncodeData(new BaseEncoder.CallBackEncodeData() {
+            @Override
+            public void callBack(boolean isAudio, ByteBuffer outputBuffer, MediaFormat outPutFormat, MediaCodec.BufferInfo bufferInfo) {
+
+            }
+        });*/
 
 
     }
@@ -141,7 +193,8 @@ public class VideoRecorder {
         //String str=VideoFileUtil.getOriginFileAbsolutePath("input");
         //MuxerHelper.muxerVideo(str);
 
-        audioRecorder.stop();
+        //audioRecorder.stop();
+        audioRecorder.release();
 
         //muxer.stop();
         //muxer.release();

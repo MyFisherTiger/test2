@@ -40,6 +40,7 @@ public class H264Encoder extends BaseVideoEncoder {
     private byte[] data;
     private int tag = 0;
     private int tagCount = 0;
+    private long startPts = 0;
 
     @Override
     public void init(int fps, int bitRate, int width, int height) {
@@ -56,6 +57,7 @@ public class H264Encoder extends BaseVideoEncoder {
             }
         }
 
+        startPts = System.nanoTime() / 1000;
         initH264MediaEncode();
     }
 
@@ -90,6 +92,10 @@ public class H264Encoder extends BaseVideoEncoder {
         //设置视频关键帧间隔，这里设置两秒一个关键帧
         outPutFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1);
         outPutFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, MAX_INPUT);//设置缓冲池的最大值
+
+        //设置sps和pps 如果设置不正确会导致合成的mp4视频作为文件预览的时候，预览图片是黑色的
+        //视频进度条拖拽画面会出现绿色，以及块状现象
+
         /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
          *//**
          * 可选配置，设置码率模式
@@ -198,6 +204,11 @@ public class H264Encoder extends BaseVideoEncoder {
                 @Override
                 public void onOutputBufferAvailable(@NonNull MediaCodec mediaCodec, int i, @NonNull MediaCodec.BufferInfo bufferInfo) {
                     ByteBuffer outputBuffer = encoder.getOutputBuffer(i);//outputBuffer is ready to be processed or rendered.
+                    bufferInfo.presentationTimeUs=System.nanoTime()/1000-startPts;
+                    bufferInfo.flags=MediaCodec.BUFFER_FLAG_KEY_FRAME;//设置为关键帧
+                    if(finishedEncoder){//该结束编码了
+                        bufferInfo.flags=MediaCodec.BUFFER_FLAG_END_OF_STREAM;
+                    }
                     LogMedia.info("本帧的编码:" + i + "bufferInfo.size:" + bufferInfo.size + "~~" + outputBuffer.toString());
 
                     //MediaFormat bufferFormat = encoder.getOutputFormat(i);//bufferFormat is equivalent to mOutputFormat
@@ -218,8 +229,8 @@ public class H264Encoder extends BaseVideoEncoder {
                     }*/
 
                     //给合成器（muxer）喂一帧编码后的数据
-                    if(listener!=null){
-                        listener.callBack(outputBuffer, outPutFormat,bufferInfo);
+                    if (listener != null) {
+                        listener.callBack(false, outputBuffer, outPutFormat, bufferInfo);
                     }
 
                     //释放输出缓冲区
