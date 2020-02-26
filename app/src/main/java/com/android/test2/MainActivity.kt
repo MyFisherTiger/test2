@@ -25,7 +25,9 @@ class MainActivity : AppCompatActivity() {
         Manifest.permission.WRITE_EXTERNAL_STORAGE,
         Manifest.permission.READ_EXTERNAL_STORAGE,
         //Manifest.permission.READ_PHONE_STATE,
-        Manifest.permission.CAMERA
+        Manifest.permission.CAMERA,
+        Manifest.permission.RECORD_AUDIO
+
     )
 
     interface OnPermissionRequestListener {
@@ -73,13 +75,16 @@ class MainActivity : AppCompatActivity() {
 
             override fun surfaceDestroyed(p0: SurfaceHolder?) {
                 Log.e("", "SurfaceView销毁")
-                videoRecorder.StopRecordVideo()
+                if(videoRecorder!=null){
+                    videoRecorder.StopRecordVideo()
+
+                }
             }
 
             override fun surfaceCreated(p0: SurfaceHolder?) {
                 Log.e("", "SurfaceView创建")
                 videoRecorder.init(context, p0)
-                videoRecorder.setVideoEncoder(H264Encoder())
+                //videoRecorder.setVideoEncoder(H264Encoder())
                 videoRecorder.startRecordVideo()
 
                 Handler().postDelayed(Runnable {

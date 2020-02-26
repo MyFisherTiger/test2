@@ -25,6 +25,7 @@ public class AACEncoder2 extends BaseAudioEncoder {
     private int tag = 0;
     private byte[] data;
     private int tagCount = 0;
+    private long startPts = 0;
 
 
     @Override
@@ -39,6 +40,7 @@ public class AACEncoder2 extends BaseAudioEncoder {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        startPts = System.nanoTime() / 1000;
         initAACMediaEncode();
     }
 
@@ -62,8 +64,9 @@ public class AACEncoder2 extends BaseAudioEncoder {
         LogMedia.info("配置AAC编码器,pcm原始码率" + BIT_RATE + "声道数" + CHANNEL_COUNT + "采样率" + SAMPLE_RATE);
         encodeFormat = MediaFormat.createAudioFormat(MediaFormat.MIMETYPE_AUDIO_AAC,
                 SAMPLE_RATE, CHANNEL_COUNT);//参数对应-> mime type、采样率、声道数
-        encodeFormat.setInteger(MediaFormat.KEY_BIT_RATE, BIT_RATE);//比特率
         encodeFormat.setInteger(MediaFormat.KEY_AAC_PROFILE, CodecProfileLevel);
+        //encodeFormat.setInteger(MediaFormat.KEY_CHANNEL_MASK, AudioFormat.CHANNEL_IN_MONO);
+        encodeFormat.setInteger(MediaFormat.KEY_BIT_RATE, BIT_RATE);//比特率
         encodeFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, MAX_INPUT);
         return encodeFormat;
     }
@@ -100,12 +103,18 @@ public class AACEncoder2 extends BaseAudioEncoder {
                     //填充编码数据
                     LogMedia.info("填充编码数据" + i + "~~" + inputBuffer.toString());
                     inputBuffer.put(data);
-                    encoder.queueInputBuffer(i, 0, data.length, 0, 0);
+                    long pts=System.nanoTime()/1000-startPts;
+                    if(finishEncoder){
+                        encoder.queueInputBuffer(i,0,data.length,pts,MediaCodec.BUFFER_FLAG_END_OF_STREAM);
+                    }else {
+                        encoder.queueInputBuffer(i, 0, data.length, pts, 0);
+                    }
                 }
 
                 @Override
                 public void onOutputBufferAvailable(@NonNull MediaCodec mediaCodec, int i, @NonNull MediaCodec.BufferInfo bufferInfo) {
                     ByteBuffer outputBuffer = encoder.getOutputBuffer(i);//outputBuffer is ready to be processed or rendered.
+                    bufferInfo.presentationTimeUs=System.nanoTime()/1000-startPts;
                     LogMedia.info("本帧的编码:" + i + "bufferInfo.size:" + bufferInfo.size + "~~" + outputBuffer.toString());
 
                     int outBitSize = bufferInfo.size + 7;
@@ -147,7 +156,7 @@ public class AACEncoder2 extends BaseAudioEncoder {
 
                 @Override
                 public void onOutputFormatChanged(@NonNull MediaCodec mediaCodec, @NonNull MediaFormat mediaFormat) {
-                    //outPutFormat = mediaFormat;
+                    encodeFormat = mediaFormat;
                 }
             });
         } else {

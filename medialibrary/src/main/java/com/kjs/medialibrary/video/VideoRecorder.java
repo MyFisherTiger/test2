@@ -2,21 +2,17 @@ package com.kjs.medialibrary.video;
 
 import android.app.Activity;
 import android.media.MediaCodec;
-import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
-import android.os.Environment;
 import android.view.SurfaceHolder;
 
 import com.kjs.medialibrary.BaseEncoder;
 import com.kjs.medialibrary.LogMedia;
 import com.kjs.medialibrary.sound.AudioRecorder;
-import com.kjs.medialibrary.sound.encoder.AACEncoder;
 import com.kjs.medialibrary.sound.encoder.AACEncoder2;
-import com.kjs.medialibrary.sound.encoder.WAVEncoder;
 import com.kjs.medialibrary.video.camera.CameraUtil;
 import com.kjs.medialibrary.video.encoder.BaseVideoEncoder;
-import com.kjs.medialibrary.video.mux.MuxerHelper;
+import com.kjs.medialibrary.video.encoder.H264Encoder;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -49,7 +45,7 @@ public class VideoRecorder {
     public void setVideoEncoder(BaseVideoEncoder videoEncoder) {
         this.videoEncoder = videoEncoder;
         //这个方法因为只需调用一次
-        this.videoEncoder.init(FPS, FPS * width * height / 1000, width, height);//30帧，256kb的码率（固定的帧率，码率硬解码）
+        this.videoEncoder.init(FPS, FPS * width * height / 100, width, height);//30帧，256kb的码率（固定的帧率，码率硬解码）
     }
 
     /**
@@ -65,6 +61,8 @@ public class VideoRecorder {
         audioRecorder.setEncoder(new AACEncoder2());
         //audioRecorder.setEncoder(new AMREncoder());
         //audioRecorder.setEncoder(new WAVEncoder());
+
+        this.setVideoEncoder(new H264Encoder());
 
         cameraUtil = new CameraUtil(context, width, height);
         cameraUtil.open(0);
@@ -105,7 +103,7 @@ public class VideoRecorder {
         LogMedia.info("去编码");
         videoEncoder.encode(data);
         //编码后回调合成
-        videoEncoder.setCallBackEncodeData(new BaseVideoEncoder.CallBackEncodeData() {
+        videoEncoder.setCallBackEncodeData(new BaseEncoder.CallBackEncodeData() {
             @Override
             public void callBack(boolean isAudio, ByteBuffer outputBuffer, MediaFormat outPutFormat, MediaCodec.BufferInfo bufferInfo) {
                 try {
@@ -149,12 +147,38 @@ public class VideoRecorder {
             }
         });
 
-        /*audioRecorder.getEncoder().setCallBackEncodeData(new BaseEncoder.CallBackEncodeData() {
+        audioRecorder.getEncoder().setCallBackEncodeData(new BaseEncoder.CallBackEncodeData() {
             @Override
             public void callBack(boolean isAudio, ByteBuffer outputBuffer, MediaFormat outPutFormat, MediaCodec.BufferInfo bufferInfo) {
+                if(isFirst){
+                    audioTrack=muxer.addTrack(audioRecorder.getEncoder().getMediaFormat());
+                    vedioTrack = muxer.addTrack(videoEncoder.getOutPutFormat());
+                    muxer.start();
+                    isFirst=false;
+                }
 
+                int currentTrackIndex = isAudio?audioTrack:vedioTrack;
+
+                //拷贝buffer
+                ByteBuffer metaBuffer = ByteBuffer.allocate(bufferInfo.size);
+                metaBuffer.put(outputBuffer);
+                metaBuffer.clear();
+                LogMedia.error("metaBuffer是多少：" + metaBuffer.toString());
+
+                //拷贝后还原buffer的位置
+                outputBuffer.position(bufferInfo.offset);
+                outputBuffer.limit(bufferInfo.offset + bufferInfo.size);
+
+
+                MediaCodec.BufferInfo metaInfo = new MediaCodec.BufferInfo();
+                metaInfo.presentationTimeUs = bufferInfo.presentationTimeUs;
+                metaInfo.offset = 0;
+                metaInfo.flags = bufferInfo.flags;
+                metaInfo.size = bufferInfo.size;
+
+                muxer.writeSampleData(currentTrackIndex, metaBuffer, metaInfo);
             }
-        });*/
+        });
 
 
     }
@@ -165,7 +189,7 @@ public class VideoRecorder {
      */
     public void startRecordVideo() {
         LogMedia.info("开始录制视频");
-        videoEncoder.setFinishedEncoder(false);
+        videoEncoder.setFinishEncoder(false);
         record = true;
 
         audioRecorder.start();
@@ -176,7 +200,7 @@ public class VideoRecorder {
      */
     public void pauseRecordVideo() {
         record = false;
-        videoEncoder.setFinishedEncoder(true);
+        videoEncoder.setFinishEncoder(true);
         LogMedia.info("暂停录制视频");
 
         audioRecorder.pause();
@@ -187,14 +211,19 @@ public class VideoRecorder {
      */
     public void StopRecordVideo() {
         LogMedia.info("停止录制视频");
-        videoEncoder.setFinishedEncoder(true);
         record = false;
-        videoEncoder.release();
+        if(videoEncoder!=null){
+            videoEncoder.setFinishEncoder(true);
+            videoEncoder.release();
+        }
         //String str=VideoFileUtil.getOriginFileAbsolutePath("input");
         //MuxerHelper.muxerVideo(str);
 
         //audioRecorder.stop();
-        audioRecorder.release();
+        if(audioRecorder!=null){
+            audioRecorder.release();
+
+        }
 
         //muxer.stop();
         //muxer.release();

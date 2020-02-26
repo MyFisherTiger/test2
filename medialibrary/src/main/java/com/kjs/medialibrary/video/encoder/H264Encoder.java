@@ -4,13 +4,11 @@ import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
 import android.media.MediaFormat;
-import android.media.MediaMuxer;
 import android.os.Build;
 
 import androidx.annotation.NonNull;
 
 import com.kjs.medialibrary.LogMedia;
-import com.kjs.medialibrary.TimeOutUtil;
 import com.kjs.medialibrary.video.VideoFileUtil;
 
 import java.io.File;
@@ -18,9 +16,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
 
 /**
  * 作者：柯嘉少 on 2019/11/20
@@ -88,7 +84,7 @@ public class H264Encoder extends BaseVideoEncoder {
         实际上，并不是所有的手机都支持COLOR_FormatYUV420Planar颜色空间
         所以正确的做法应该是，获取当前设备支持的颜色空间，并从中选取*/
 
-        outPutFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar);
+        outPutFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar);
         //设置视频关键帧间隔，这里设置两秒一个关键帧
         outPutFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1);
         outPutFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, MAX_INPUT);//设置缓冲池的最大值
@@ -198,17 +194,20 @@ public class H264Encoder extends BaseVideoEncoder {
                     //填充编码数据
                     LogMedia.info("填充编码数据" + i + "~~" + inputBuffer.toString());
                     inputBuffer.put(data);
-                    encoder.queueInputBuffer(i, 0, data.length, 0, 0);
+                    long pts=System.nanoTime()/1000-startPts;
+                    if(finishEncoder){//该结束编码了
+                        encoder.queueInputBuffer(i, 0, data.length, pts, MediaCodec.BUFFER_FLAG_END_OF_STREAM);
+                    }else {
+                        encoder.queueInputBuffer(i, 0, data.length, pts, MediaCodec.BUFFER_FLAG_CODEC_CONFIG);
+
+                    }
                 }
 
                 @Override
                 public void onOutputBufferAvailable(@NonNull MediaCodec mediaCodec, int i, @NonNull MediaCodec.BufferInfo bufferInfo) {
                     ByteBuffer outputBuffer = encoder.getOutputBuffer(i);//outputBuffer is ready to be processed or rendered.
+                    bufferInfo.flags=MediaCodec.BUFFER_FLAG_KEY_FRAME;
                     bufferInfo.presentationTimeUs=System.nanoTime()/1000-startPts;
-                    bufferInfo.flags=MediaCodec.BUFFER_FLAG_KEY_FRAME;//设置为关键帧
-                    if(finishedEncoder){//该结束编码了
-                        bufferInfo.flags=MediaCodec.BUFFER_FLAG_END_OF_STREAM;
-                    }
                     LogMedia.info("本帧的编码:" + i + "bufferInfo.size:" + bufferInfo.size + "~~" + outputBuffer.toString());
 
                     //MediaFormat bufferFormat = encoder.getOutputFormat(i);//bufferFormat is equivalent to mOutputFormat
@@ -249,7 +248,7 @@ public class H264Encoder extends BaseVideoEncoder {
 
                 @Override
                 public void onOutputFormatChanged(@NonNull MediaCodec mediaCodec, @NonNull MediaFormat mediaFormat) {
-                    //outPutFormat = mediaFormat;
+                    outPutFormat = mediaFormat;
                 }
             });
         } else {

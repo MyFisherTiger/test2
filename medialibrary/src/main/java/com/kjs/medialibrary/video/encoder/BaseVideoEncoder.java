@@ -21,19 +21,10 @@ public abstract class BaseVideoEncoder extends BaseEncoder {
     protected int height = 480;//视频高度720
     protected String destinationFile;//转码后的文件，未转码时为空
     protected MediaCodec encoder;
-    protected boolean finishedEncoder = false;//是否已完成编码，true已完成，停止编码；false未完成，编码队列继续编码
 
 
 
-    /**
-     * 设置是否结束编码
-     * 说明：是否已完成编码，true已完成，停止编码；false未完成，编码队列继续编码
-     *
-     * @param finishedEncoder
-     */
-    public void setFinishedEncoder(boolean finishedEncoder) {
-        this.finishedEncoder = finishedEncoder;
-    }
+
 
     /**
      * @return 转码后的文件，未转码时为空
