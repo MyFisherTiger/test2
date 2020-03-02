@@ -32,6 +32,7 @@ public class VideoRecorder {
     private int width = 1280;//1280
     private int height = 720;//720
     private int FPS = 24;
+    private float BPP=0.05f;//0~100
     private String fileName;
     private String desFile;
     private int audioTrack;
@@ -45,7 +46,7 @@ public class VideoRecorder {
     public void setVideoEncoder(BaseVideoEncoder videoEncoder) {
         this.videoEncoder = videoEncoder;
         //这个方法因为只需调用一次
-        this.videoEncoder.init(FPS, FPS * width * height / 100, width, height);//30帧，256kb的码率（固定的帧率，码率硬解码）
+        this.videoEncoder.init(FPS, ((int)BPP*FPS * width * height), width, height);//30帧，256kb的码率（固定的帧率，码率硬解码）
     }
 
     /**
