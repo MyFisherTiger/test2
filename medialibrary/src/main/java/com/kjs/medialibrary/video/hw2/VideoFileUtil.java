@@ -1,4 +1,4 @@
-package com.kjs.medialibrary.video;
+package com.kjs.medialibrary.video.hw2;
 
 import android.os.Environment;
 import android.text.TextUtils;

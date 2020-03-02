@@ -1,4 +1,4 @@
-package com.kjs.medialibrary.video.encoder;
+package com.kjs.medialibrary.video.hw2.encoder;
 
 /**
  * 作者：柯嘉少 on 2019/11/20

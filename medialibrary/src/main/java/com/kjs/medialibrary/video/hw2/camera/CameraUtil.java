@@ -1,4 +1,4 @@
-package com.kjs.medialibrary.video.camera;
+package com.kjs.medialibrary.video.hw2.camera;
 
 
 import android.app.Activity;
@@ -10,10 +10,8 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 
 import com.kjs.medialibrary.LogMedia;
-import com.kjs.medialibrary.video.encoder.BaseVideoEncoder;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 /**

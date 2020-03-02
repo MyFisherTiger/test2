@@ -1,4 +1,4 @@
-package com.kjs.medialibrary.video;
+package com.kjs.medialibrary.video.hw2;
 
 import android.app.Activity;
 import android.media.MediaCodec;
@@ -10,9 +10,9 @@ import com.kjs.medialibrary.BaseEncoder;
 import com.kjs.medialibrary.LogMedia;
 import com.kjs.medialibrary.sound.AudioRecorder;
 import com.kjs.medialibrary.sound.encoder.AACEncoder2;
-import com.kjs.medialibrary.video.camera.CameraUtil;
-import com.kjs.medialibrary.video.encoder.BaseVideoEncoder;
-import com.kjs.medialibrary.video.encoder.H264Encoder;
+import com.kjs.medialibrary.video.hw2.camera.CameraUtil;
+import com.kjs.medialibrary.video.hw2.encoder.BaseVideoEncoder;
+import com.kjs.medialibrary.video.hw2.encoder.H264Encoder;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

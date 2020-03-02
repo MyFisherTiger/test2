@@ -1,4 +1,4 @@
-package com.kjs.medialibrary.video.encoder;
+package com.kjs.medialibrary.video.hw2.encoder;
 
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
@@ -9,7 +9,7 @@ import android.os.Build;
 import androidx.annotation.NonNull;
 
 import com.kjs.medialibrary.LogMedia;
-import com.kjs.medialibrary.video.VideoFileUtil;
+import com.kjs.medialibrary.video.hw2.VideoFileUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -159,6 +159,7 @@ public class H264Encoder extends BaseVideoEncoder {
 
 
     //MediaFormat mOutputFormat;
+    private int flag=MediaCodec.BUFFER_FLAG_CODEC_CONFIG;
 
     @Override
     public void encode(final byte[] encoderData) {
@@ -186,6 +187,7 @@ public class H264Encoder extends BaseVideoEncoder {
         }
         wait = true;
 
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             encoder.setCallback(new MediaCodec.Callback() {
                 @Override
@@ -206,7 +208,7 @@ public class H264Encoder extends BaseVideoEncoder {
                 @Override
                 public void onOutputBufferAvailable(@NonNull MediaCodec mediaCodec, int i, @NonNull MediaCodec.BufferInfo bufferInfo) {
                     ByteBuffer outputBuffer = encoder.getOutputBuffer(i);//outputBuffer is ready to be processed or rendered.
-                    bufferInfo.flags=MediaCodec.BUFFER_FLAG_KEY_FRAME;
+                    bufferInfo.flags=flag;
                     bufferInfo.presentationTimeUs=System.nanoTime()/1000-startPts;
                     LogMedia.info("本帧的编码:" + i + "bufferInfo.size:" + bufferInfo.size + "~~" + outputBuffer.toString());
 

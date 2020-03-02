@@ -1,24 +1,11 @@
-package com.kjs.medialibrary.video.mux;
+package com.kjs.medialibrary.video.hw2.mux;
 
 import android.media.MediaCodec;
-import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
-import android.os.Build;
-import android.util.Log;
-
-import androidx.annotation.RequiresApi;
-
-import com.kjs.medialibrary.LogMedia;
-import com.kjs.medialibrary.video.VideoFileUtil;
-import com.kjs.medialibrary.video.encoder.BaseVideoEncoder;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import static android.content.ContentValues.TAG;
 
 /**
  * 作者：柯嘉少 on 2019/11/21

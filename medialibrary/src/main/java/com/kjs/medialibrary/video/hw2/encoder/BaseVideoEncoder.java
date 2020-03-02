@@ -1,11 +1,9 @@
-package com.kjs.medialibrary.video.encoder;
+package com.kjs.medialibrary.video.hw2.encoder;
 
 import android.media.MediaCodec;
 import android.media.MediaFormat;
 
 import com.kjs.medialibrary.BaseEncoder;
-
-import java.nio.ByteBuffer;
 
 /**
  * 作者：柯嘉少 on 2019/11/20

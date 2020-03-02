@@ -1,4 +1,4 @@
-package com.kjs.medialibrary.video.camera;
+package com.kjs.medialibrary.video.hw2.camera;
 
 import android.content.Context;
 import android.util.AttributeSet;
