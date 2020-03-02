@@ -94,9 +94,11 @@ public class AACEncoder extends BaseAudioEncoder {
         task = new TimerTask() {
             @Override
             public void run() {
+                LogMedia.info("请稍侯。。。。");
+
                 if (index == -1 && outputId == -1) {//解码完毕，结束任务
                     LogMedia.info("编码完毕，结束任务");
-                    release();
+                    //release();
                 }
                 putPCMData(0, sourceFile);
             }
@@ -193,6 +195,12 @@ public class AACEncoder extends BaseAudioEncoder {
                 LogMedia.info("pcmFile读完了");
 
                 LogMedia.info("解码完毕，结束任务");
+
+                if(callBackFinishEncode!=null){
+                    LogMedia.info("请回调callBackFinishEncode，释放AudioRecorder的内存");
+                    callBackFinishEncode.callBackFinish(0);
+                }
+
                 release();
             } catch (FileNotFoundException e) {
                 e.printStackTrace();

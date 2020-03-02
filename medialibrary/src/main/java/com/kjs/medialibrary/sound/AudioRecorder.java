@@ -6,6 +6,7 @@ import android.media.MediaRecorder;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.kjs.medialibrary.BaseEncoder;
 import com.kjs.medialibrary.LogMedia;
 import com.kjs.medialibrary.sound.encoder.BaseAudioEncoder;
 
@@ -298,9 +299,9 @@ public class AudioRecorder {
                     if (fos != null) {
                         fos.close();
                         LogMedia.info("pcm文件写入完毕");
-                        /*if (status == Status.STATUS_READY) {
+                        if (status == Status.STATUS_READY) {
                             makeDestFile();
-                        }*/
+                        }
 
                     }
                 } catch (IOException e) {
@@ -310,6 +311,31 @@ public class AudioRecorder {
         });
         saveFileThread.start();
 
+    }
+
+    /**
+     * 文件进行转码，格式封装
+     */
+    private void makeDestFile() {
+        if (encoder == null || audioRecord == null)
+            return;
+        LogMedia.error("开始转码");
+        new Thread() {
+            @Override
+            public void run() {
+                int bitRate = audioSampleRate * 16 * audioRecord.getChannelCount();//264600
+                encoder.init(audioSampleRate, bitRate, audioRecord.getChannelCount());
+                encoder.encode(pcmFileName);
+                encoder.setCallBackFinishEncode(new BaseEncoder.CallBackFinishEncode() {
+                    @Override
+                    public void callBackFinish(int tag) {
+                        if(tag==0){
+                            release();
+                        }
+                    }
+                });
+            }
+        }.run();
     }
 
     private void initEncoder(){

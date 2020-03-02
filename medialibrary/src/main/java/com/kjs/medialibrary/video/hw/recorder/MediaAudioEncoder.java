@@ -133,6 +133,7 @@ public class MediaAudioEncoder extends MediaEncoder {
 											// set audio data to encoder
 											buf.position(readBytes);
 											buf.flip();
+											//屏蔽掉录出来的就是有影无声的mp4
 											encode(buf, readBytes, getPTSUs());
 											frameAvailableSoon();
 										}

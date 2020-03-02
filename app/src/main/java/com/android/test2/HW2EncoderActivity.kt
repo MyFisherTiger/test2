@@ -7,6 +7,7 @@ import android.view.SurfaceHolder
 import android.view.SurfaceView
 import com.kjs.medialibrary.LogMedia
 import com.kjs.medialibrary.sound.AudioRecorder
+import com.kjs.medialibrary.sound.encoder.AACEncoder
 import com.kjs.medialibrary.sound.encoder.WAVEncoder
 import com.kjs.medialibrary.video.hw2.VideoRecorder
 
@@ -31,7 +32,8 @@ class HW2EncoderActivity : BaseActivity() {
         askPermission(PERMISSIONS, object : OnPermissionRequestListener {
             override fun onSuccess() {
                 LogMedia.info("获取权限成功")
-                testCamera()
+                //testCamera()
+                testAudio()
             }
 
             override fun onFailure() {
@@ -82,14 +84,15 @@ class HW2EncoderActivity : BaseActivity() {
     }
 
     private fun testAudio() {
+        LogMedia.info("录制10秒的声音")
         var audioRecorder = AudioRecorder()
-        //audioRecorder.setEncoder(AACEncoder())
+        audioRecorder.setEncoder(AACEncoder())
         //audioRecorder.setEncoder(AMREncoder())
-        audioRecorder.setEncoder(WAVEncoder())
+        //audioRecorder.setEncoder(WAVEncoder())
         audioRecorder.start()
         Handler().postDelayed(Runnable {
             audioRecorder.stop()
-        }, 20000)
+        }, 10000)
     }
 }
 
