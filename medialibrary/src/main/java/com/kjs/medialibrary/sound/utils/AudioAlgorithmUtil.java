@@ -13,8 +13,7 @@ public class AudioAlgorithmUtil {
     private int preGain = 7;
     //降噪前增益 0到40
     private int postGain = 9;
-    //是否开启音频算法
-    private boolean isAlgorithm = false;
+
 
     public AudioAlgorithmUtil(int mBufferSize) {
         this.audioProcessor = new AudioProcessor(mBufferSize);

@@ -48,6 +48,8 @@ public class AudioRecorder {
     private int lastVolume = 0;//录音的分贝
     private BaseAudioEncoder encoder;//编码格式
     private Thread saveFileThread;
+    //是否开启音频算法
+    private boolean isAlgorithm = false;
     private AudioAlgorithmUtil audioAlgorithmUtil;
 
     /**
@@ -288,8 +290,10 @@ public class AudioRecorder {
                             if (readsize > 0 && readsize <= audioData.length){
                                 //采集的写入最原始的pcm文件
                                 fos.write(audioData, 0, readsize);
-                                //音频算法处理，降噪或增益
-                                audioData=audioAlgorithmUtil.processAudio(audioData);
+                                if(isAlgorithm){
+                                    //音频算法处理，降噪或增益
+                                    audioData=audioAlgorithmUtil.processAudio(audioData);
+                                }
                                 //采集的送去编码
                                 if(!BaseAudioEncoder.wait){
                                     encoder.encode(audioData);
