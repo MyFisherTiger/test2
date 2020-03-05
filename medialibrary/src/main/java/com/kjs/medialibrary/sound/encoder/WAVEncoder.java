@@ -2,7 +2,7 @@ package com.kjs.medialibrary.sound.encoder;
 
 import android.media.MediaFormat;
 
-import com.kjs.medialibrary.sound.AudioFileUtils;
+import com.kjs.medialibrary.sound.utils.AudioFileUtils;
 
 import java.io.File;
 import java.io.FileInputStream;

@@ -6,7 +6,7 @@ import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.os.Build;
 
-import com.kjs.medialibrary.sound.AudioFileUtils;
+import com.kjs.medialibrary.sound.utils.AudioFileUtils;
 
 import java.io.File;
 import java.io.FileInputStream;

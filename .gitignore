@@ -14,3 +14,5 @@
 .cxx
 .idea/vcs.xml
 .idea/.name
+.idea/misc.xml
+.idea/gradle.xml

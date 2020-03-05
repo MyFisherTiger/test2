@@ -9,6 +9,8 @@ import android.util.Log;
 import com.kjs.medialibrary.BaseEncoder;
 import com.kjs.medialibrary.LogMedia;
 import com.kjs.medialibrary.sound.encoder.BaseAudioEncoder;
+import com.kjs.medialibrary.sound.utils.AudioAlgorithmUtil;
+import com.kjs.medialibrary.sound.utils.AudioFileUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -46,6 +48,7 @@ public class AudioRecorder {
     private int lastVolume = 0;//录音的分贝
     private BaseAudioEncoder encoder;//编码格式
     private Thread saveFileThread;
+    private AudioAlgorithmUtil audioAlgorithmUtil;
 
     /**
      * 录音的状态
@@ -121,6 +124,7 @@ public class AudioRecorder {
         bufferSizeInBytes = AudioRecord.getMinBufferSize(audioSampleRate,
                 audioChannel, audioEncode);
         audioRecord = new AudioRecord(audioInput, audioSampleRate, audioChannel, audioEncode, bufferSizeInBytes);
+        audioAlgorithmUtil=new AudioAlgorithmUtil(bufferSizeInBytes);
         initEncoder();
         if (status == Status.STATUS_NO_READY) {
             return;
@@ -282,7 +286,11 @@ public class AudioRecorder {
                         //Log.i(TAG, "writeDataTOFile: volume -- " + raw + " / lastvolumn -- " + lastVolume);
                     }*/
                             if (readsize > 0 && readsize <= audioData.length){
+                                //采集的写入最原始的pcm文件
                                 fos.write(audioData, 0, readsize);
+                                //音频算法处理，降噪或增益
+                                audioData=audioAlgorithmUtil.processAudio(audioData);
+                                //采集的送去编码
                                 if(!BaseAudioEncoder.wait){
                                     encoder.encode(audioData);
                                 }

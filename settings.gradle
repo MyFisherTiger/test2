@@ -1,2 +1,2 @@
-include ':app', ':medialibrary'
+include ':app', ':medialibrary', ':audio_algorithm'
 rootProject.name='test2'
