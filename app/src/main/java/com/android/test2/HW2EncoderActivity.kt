@@ -10,6 +10,7 @@ import com.kjs.medialibrary.sound.AudioRecorder
 import com.kjs.medialibrary.sound.encoder.AACEncoder
 import com.kjs.medialibrary.sound.encoder.WAVEncoder
 import com.kjs.medialibrary.video.hw2.VideoRecorder
+import kotlinx.android.synthetic.main.activity_hw2encoder.*
 
 class HW2EncoderActivity : BaseActivity() {
     private var context = this
@@ -84,15 +85,30 @@ class HW2EncoderActivity : BaseActivity() {
     }
 
     private fun testAudio() {
+
         LogMedia.info("录制10秒的声音")
         var audioRecorder = AudioRecorder()
         audioRecorder.setEncoder(AACEncoder())
         //audioRecorder.setEncoder(AMREncoder())
         //audioRecorder.setEncoder(WAVEncoder())
-        audioRecorder.start()
+
+        //暂停与重新开始会产生0b的无用文件，需要优化一下
+        btn_start.setOnClickListener {
+            audioRecorder.start()
+        }
+
+        btn_pause.setOnClickListener {
+            audioRecorder.pause()
+        }
+
+        btn_stop.setOnClickListener {
+            audioRecorder.stop()
+        }
+
+        /*audioRecorder.start()
         Handler().postDelayed(Runnable {
             audioRecorder.stop()
-        }, 10000)
+        }, 10000)*/
     }
 }
 
