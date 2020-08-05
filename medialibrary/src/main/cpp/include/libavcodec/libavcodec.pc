@@ -1,0 +1,14 @@
+prefix=/Users/fishertiger/Documents/ffmpeg/ffmpeg-4.3.1/android_single/armv7-a
+exec_prefix=${prefix}
+libdir=/Users/fishertiger/Documents/ffmpeg/ffmpeg-4.3.1/android_single/armv7-a/lib
+includedir=/Users/fishertiger/Documents/ffmpeg/ffmpeg-4.3.1/android_single/armv7-a/include
+
+Name: libavcodec
+Description: FFmpeg codec library
+Version: 58.91.100
+Requires: libswresample >= 3.7.100, libavutil >= 56.51.100
+Requires.private: 
+Conflicts:
+Libs: -L${libdir}  -lavcodec -pthread -lm -lz
+Libs.private: 
+Cflags: -I${includedir}

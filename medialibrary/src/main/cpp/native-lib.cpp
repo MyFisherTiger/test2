@@ -7,5 +7,5 @@ extern "C" JNIEXPORT jstring JNICALL
 
 Java_com_kjs_medialibrary_nactive_NativeFFMPEG_stringFromJNI(JNIEnv *env,jobject /* this */) {
       std::string hello = "Hello from C++";
-      return env->NewStringUTF(av_version_info());//返回ffmpeg的版本
+      return env->NewStringUTF(avcodec_configuration());
 }

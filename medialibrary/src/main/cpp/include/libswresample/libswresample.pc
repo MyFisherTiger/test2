@@ -1,0 +1,14 @@
+prefix=/Users/fishertiger/Documents/ffmpeg/ffmpeg-4.3.1/android_single/armv7-a
+exec_prefix=${prefix}
+libdir=/Users/fishertiger/Documents/ffmpeg/ffmpeg-4.3.1/android_single/armv7-a/lib
+includedir=/Users/fishertiger/Documents/ffmpeg/ffmpeg-4.3.1/android_single/armv7-a/include
+
+Name: libswresample
+Description: FFmpeg audio resampling library
+Version: 3.7.100
+Requires: libavutil >= 56.51.100
+Requires.private: 
+Conflicts:
+Libs: -L${libdir}  -lswresample -lm
+Libs.private: 
+Cflags: -I${includedir}

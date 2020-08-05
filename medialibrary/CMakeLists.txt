@@ -23,7 +23,13 @@ add_library( # Sets the name of the library.
              SHARED
 
              # Provides a relative path to your source file(s).
-        src/main/cpp/native-lib.cpp)
+            src/main/cpp/native-lib.cpp
+            src/main/cpp/include/cmdutils.c
+            src/main/cpp/include/ffmpeg.c
+            src/main/cpp/include/ffmpeg_filter.c
+            src/main/cpp/include/ffmpeg_hw.c
+            src/main/cpp/include/ffmpeg_opt.c
+        )
 
 add_library( avcodec SHARED IMPORTED)
 set_target_properties( avcodec PROPERTIES IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/libs/${ANDROID_ABI}/libavcodec.so)
