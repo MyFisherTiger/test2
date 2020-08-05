@@ -536,9 +536,9 @@
 @c @set config-omx-rpi no
 @set config-runtime-cpudetect yes
 @set config-safe-bitstream-reader yes
-@c @set config-shared no
+@set config-shared yes
 @c @set config-small no
-@set config-static yes
+@c @set config-static no
 @set config-swscale-alpha yes
 @c @set config-gpl no
 @c @set config-nonfree no

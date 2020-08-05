@@ -18,6 +18,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include "android/log.h"
+#include <regex.h>
+
+
+#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG  , "ffmpeg.c", __VA_ARGS__)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR  , "ffmpeg.c", __VA_ARGS__)
+
 /**
  * @file
  * multimedia converter based on the FFmpeg libraries
@@ -69,13 +76,6 @@
 # include "libavfilter/avfilter.h"
 # include "libavfilter/buffersrc.h"
 # include "libavfilter/buffersink.h"
-
-#include "android/log.h"
-
-#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG  , "ffmpeg.c", __VA_ARGS__)
-#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR  , "ffmpeg.c", __VA_ARGS__)
-
-
 
 #if HAVE_SYS_RESOURCE_H
 #include <sys/time.h>
@@ -4822,8 +4822,7 @@ static int64_t getmaxrss(void)
 static int progress = 0;
 
 //实现日志回调函数
-static void log_callback_null(void *ptr, int level, const char *fmt, va_list vl)
-{
+static void log_callback_null(void *ptr, int level, const char *fmt, va_list vl) {
     static int print_prefix = 1;
     static char prev[1024];
     char line[1024];
@@ -4875,6 +4874,13 @@ int update_progress(char *srcStr) {
     LOGE("result=%d\n", result);
     return result;
 }
+
+//提供获取进度的接口
+int get_progress() {
+    return progress;
+}
+
+
 
 int ffmpeg_exec(int argc, char **argv)
 {
@@ -4944,7 +4950,7 @@ int ffmpeg_exec(int argc, char **argv)
     if ((decode_error_stat[0] + decode_error_stat[1]) * max_error_rate < decode_error_stat[1])
         exit_program(69);
 
-    //exit_program(received_nb_signals ? 255 : main_return_code);
+    //    exit_program(received_nb_signals ? 255 : main_return_code);
 
     progress = 0;
 

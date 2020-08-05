@@ -1,14 +1,14 @@
-prefix=/Users/fishertiger/Documents/ffmpeg/ffmpeg-4.3.1/android_single/armv7-a
+prefix=/Users/fishertiger/Documents/ffmpeg/ffmpeg-4.3.1/android_all/armv7-a
 exec_prefix=${prefix}
-libdir=/Users/fishertiger/Documents/ffmpeg/ffmpeg-4.3.1/android_single/armv7-a/lib
-includedir=/Users/fishertiger/Documents/ffmpeg/ffmpeg-4.3.1/android_single/armv7-a/include
+libdir=/Users/fishertiger/Documents/ffmpeg/ffmpeg-4.3.1/android_all/armv7-a/lib
+includedir=/Users/fishertiger/Documents/ffmpeg/ffmpeg-4.3.1/android_all/armv7-a/include
 
 Name: libswscale
 Description: FFmpeg image rescaling library
 Version: 5.7.100
-Requires: libavutil >= 56.51.100
-Requires.private: 
+Requires: 
+Requires.private: libavutil >= 56.51.100
 Conflicts:
-Libs: -L${libdir}  -lswscale -lm
-Libs.private: 
+Libs: -L${libdir}  -lswscale 
+Libs.private: -lm
 Cflags: -I${includedir}
