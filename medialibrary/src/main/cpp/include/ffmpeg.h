@@ -16,9 +16,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef FFTOOLS_FFMPEG_H
-#define FFTOOLS_FFMPEG_H
-
 #include "config.h"
 
 #include <stdint.h>
@@ -45,6 +42,9 @@
 #include "libavutil/threadmessage.h"
 
 #include "libswresample/swresample.h"
+
+#ifndef FFTOOLS_FFMPEG_H
+#define FFTOOLS_FFMPEG_H
 
 #define VSYNC_AUTO       -1
 #define VSYNC_PASSTHROUGH 0
@@ -615,6 +615,13 @@ extern const AVIOInterruptCB int_cb;
 
 extern const OptionDef options[];
 extern const HWAccel hwaccels[];
+
+int update_progress(char* srcStr);
+
+int get_progress();
+
+int ffmpeg_exec(int argc, char **argv);
+
 #if CONFIG_QSV
 extern char *qsv_device;
 #endif
@@ -663,13 +670,5 @@ int hw_device_setup_for_encode(OutputStream *ost);
 int hw_device_setup_for_filter(FilterGraph *fg);
 
 int hwaccel_decode_init(AVCodecContext *avctx);
-
-int update_progress(char* srcStr);
-
-int get_progress();
-
-int ffmpeg_exec(int argc, char **argv);
-
-
 
 #endif /* FFTOOLS_FFMPEG_H */

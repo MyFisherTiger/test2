@@ -18,12 +18,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "android/log.h"
 #include <regex.h>
-
-
+#include "android/log.h"
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG  , "ffmpeg.c", __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR  , "ffmpeg.c", __VA_ARGS__)
+
+#include "ffmpeg.h"
+#include "cmdutils.h"
+
+#include "libavutil/avassert.h"
 
 /**
  * @file
@@ -108,10 +111,7 @@
 
 #include <time.h>
 
-#include "ffmpeg.h"
-#include "cmdutils.h"
 
-#include "libavutil/avassert.h"
 
 const char program_name[] = "ffmpeg";
 const int program_birth_year = 2000;
@@ -4876,11 +4876,10 @@ int update_progress(char *srcStr) {
 }
 
 //提供获取进度的接口
-int get_progress() {
+int get_progress()
+{
     return progress;
 }
-
-
 
 int ffmpeg_exec(int argc, char **argv)
 {
