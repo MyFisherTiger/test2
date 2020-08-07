@@ -4,7 +4,6 @@ cmake_minimum_required(VERSION 3.4.1)
 #头文件路径
 include_directories(${PROJECT_SOURCE_DIR}/src/main/cpp/include)
 
-
 # Creates and names a library, sets it as either STATIC
 # or SHARED, and provides the relative paths to its source code.
 # You can define multiple libraries, and CMake builds them for you.
@@ -24,11 +23,6 @@ add_library( # Sets the name of the library.
 
              # Provides a relative path to your source file(s).
             src/main/cpp/native-lib.cpp
-            src/main/cpp/include/cmdutils.c
-            src/main/cpp/include/ffmpeg.c
-            src/main/cpp/include/ffmpeg_filter.c
-            src/main/cpp/include/ffmpeg_hw.c
-            src/main/cpp/include/ffmpeg_opt.c
         )
 
 add_library( avcodec SHARED IMPORTED)
