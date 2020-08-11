@@ -1,2 +1,3 @@
+include ':mp3library'
 include ':app', ':medialibrary', ':audio_algorithm'
 rootProject.name='test2'

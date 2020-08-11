@@ -1,7 +1,6 @@
 #include <jni.h>
 #include <string>
 #include <libavcodec/jni.h>
-#include <ffmpeg.h>
 
 #include "android/log.h"
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG  , "native-lib.c", __VA_ARGS__)
